@@ -1,0 +1,26 @@
+# FastAPI y servidor
+fastapi==0.115.0
+uvicorn[standard]==0.38.0
+pydantic==2.9.2
+pydantic-settings==2.6.0
+
+# Machine Learning
+tensorflow==2.18.0
+keras==3.6.0
+numpy==1.26.4
+pillow==11.0.0
+opencv-python==4.10.0.84
+
+# Base de datos
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10  # Para PostgreSQL
+alembic==1.14.0
+
+# Utilidades
+python-multipart==0.0.12  # Para upload de archivos
+python-dotenv==1.0.1
+pydantic-settings==2.6.0
+
+# Seguridad (opcional)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
