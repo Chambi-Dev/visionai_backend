@@ -1,0 +1,40 @@
+# Entorno Virtual
+/venv
+.venv/
+env/
+env.bak/
+venv.bak/
+
+# Archivos de caché y compilados
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de configuración del IDE
+vscode/
+.idea/
+*.swp
+*.swo
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Archivos de base de datos local
+*.sqlite3
+*.db
+
+# Reportes de testing y cobertura
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
