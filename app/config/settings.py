@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     
     # Configuración de base de datos
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: str = "postgresql+psycopg2://postgres:123@localhost:5432/visionai_db"
     
     # Configuración del modelo ML
     MODEL_PATH: str = "ml_models/modelo_emociones.keras"
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        env_file_encoding = 'utf-8'
 
 
 # Instancia única de configuración
