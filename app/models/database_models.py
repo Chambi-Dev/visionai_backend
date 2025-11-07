@@ -14,7 +14,7 @@ class ModelVersion(Base):
     model_id = Column(Integer, primary_key=True, autoincrement=True)
     model_version_tag = Column(String(100), unique=True, nullable=False)
     model_filename = Column(String(255), nullable=False)
-    model_status = Column(String(10), nullable=False)
+    model_status = Column(String(2), nullable=False)
     creation_date = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
 class PredictionsLog(Base):
