@@ -79,16 +79,26 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-4. **Configurar base de datos**
+4. **Configurar variables de entorno**
 ```bash
-# Editar app/config/settings.py con tus credenciales
-DATABASE_URL=postgresql://user:password@localhost:5432/visionai_db
+# Copiar el archivo de ejemplo
+cp .env.example .env
+
+# Editar .env con tu contraseña de PostgreSQL
+# Por defecto usa la contraseña "123"
+# Cambia solo la contraseña en DATABASE_URL si la tuya es diferente
+```
+
+5. **Configurar base de datos**
+```bash
+# Crear base de datos en PostgreSQL
+createdb visionai_db
 
 # Ejecutar migraciones
 alembic upgrade head
 ```
 
-5. **Iniciar servidor**
+6. **Iniciar servidor**
 ```bash
 python -m app.main
 ```
@@ -281,23 +291,56 @@ visionai_backend/
 
 ## 🔧 Configuración
 
-### Variables de Entorno (.env)
+### Variables de Entorno
 
-Crea un archivo `.env` en la raíz:
+El proyecto usa variables de entorno para configuración sensible como contraseñas de base de datos.
 
-```env
-# Base de datos
-DATABASE_URL=postgresql://user:password@localhost:5432/visionai_db
+#### Configuración Inicial
 
-# Servidor
-HOST=0.0.0.0
-PORT=8000
+1. **Copiar archivo de ejemplo:**
+   ```bash
+   cp .env.example .env
+   ```
 
-# Modelo ML
-MODEL_PATH=ml_models/modelo_emociones.h5
+2. **Editar `.env` con tu configuración local:**
+   ```env
+   # Base de datos - CAMBIA LA CONTRASEÑA según tu PostgreSQL
+   DATABASE_URL=postgresql+psycopg2://postgres:TU_CONTRASEÑA@localhost:5432/visionai_db
+   
+   # Servidor WebSocket
+   HOST=0.0.0.0
+   PORT=8000
+   
+   # Modelo ML
+   MODEL_PATH=ml_models/modelo_emociones.h5
+   
+   # Debug
+   DEBUG=True
+   ```
 
-# Debug
-DEBUG=True
+3. **Importante:** El archivo `.env` está en `.gitignore` y **NUNCA** se sube a Git por seguridad.
+
+#### 🔐 Gestión de Contraseñas
+
+- **`.env.example`** - Archivo de plantilla con contraseña por defecto `123` (se sube a Git)
+- **`.env`** - Tu configuración local con tu contraseña real (NO se sube a Git)
+
+**Para trabajo en equipo:**
+- Cada desarrollador copia `.env.example` a `.env`
+- Cada uno modifica la contraseña según su PostgreSQL local
+- Nadie sube su `.env` al repositorio
+- Si no existe `.env`, el sistema usa automáticamente la contraseña `123` por defecto
+
+**Ejemplo para diferentes máquinas:**
+```bash
+# Máquina 1 (.env)
+DATABASE_URL=postgresql+psycopg2://postgres:miPassword123@localhost:5432/visionai_db
+
+# Máquina 2 (.env)
+DATABASE_URL=postgresql+psycopg2://postgres:otraPassword@localhost:5432/visionai_db
+
+# Git (.env.example) - Contraseña por defecto
+DATABASE_URL=postgresql+psycopg2://postgres:123@localhost:5432/visionai_db
 ```
 
 ### Configuración de la Base de Datos
@@ -395,7 +438,30 @@ kill -9 <PID>           # Linux
 pg_isready
 
 # Probar conexión
-psql -U user -d visionai_db
+psql -U postgres -d visionai_db
+
+# Si falla por contraseña incorrecta:
+# 1. Verifica tu contraseña de PostgreSQL
+# 2. Edita el archivo .env con la contraseña correcta
+# 3. Reinicia el servidor: python -m app.main
+```
+
+### Configuración en nueva máquina
+
+```bash
+# 1. Clonar repositorio
+git clone <url>
+
+# 2. Copiar configuración de ejemplo
+cp .env.example .env
+
+# 3. Editar .env con TU contraseña de PostgreSQL
+nano .env  # o notepad .env en Windows
+
+# 4. Instalar dependencias y ejecutar
+pip install -r requirements.txt
+alembic upgrade head
+python -m app.main
 ```
 
 ### Modelo no carga
