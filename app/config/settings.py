@@ -14,10 +14,10 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     
     # Configuración de base de datos
-    DATABASE_URL: str = "postgresql+psycopg2://postgres:123@localhost:5432/visionai_db"
+    DATABASE_URL: str = "postgresql+psycopg2://postgres:andycrack@localhost:5432/visionai_db"
     
     # Configuración del modelo ML
-    MODEL_PATH: str = "ml_models/modelo_emociones.keras"
+    MODEL_PATH: str = "ml_models/modelo_emociones.h5"
     
     # Configuración de CORS
     ALLOWED_ORIGINS: list = ["*"]

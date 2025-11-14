@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test VisionAI WebSocket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        .file-input {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #result {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .emotion-result {
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .confidence {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        pre {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 VisionAI WebSocket Test</h1>
+        
+        <div id="status" class="status disconnected">
+            ❌ Desconectado
+        </div>
+
+        <div class="file-input">
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+
+        <div class="buttons">
+            <button class="btn-primary" onclick="connect()">🔌 Conectar</button>
+            <button class="btn-success" onclick="predict()">🎯 Predecir</button>
+            <button class="btn-info" onclick="getEmotions()">📋 Emociones</button>
+            <button class="btn-warning" onclick="getModelInfo()">🤖 Modelo</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+
+        function updateStatus(connected) {
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '✅ Conectado a ws://localhost:8000';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '❌ Desconectado';
+            }
+        }
+
+        function addResult(content, isJson = false) {
+            const item = document.createElement('div');
+            item.className = 'result-item';
+            
+            if (isJson) {
+                item.innerHTML = `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            } else {
+                item.innerHTML = content;
+            }
+            
+            resultDiv.insertBefore(item, resultDiv.firstChild);
+        }
+
+        function connect() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                addResult('⚠️ Ya estás conectado');
+                return;
+            }
+
+            ws = new WebSocket('ws://localhost:8000');
+            
+            ws.onopen = () => {
+                updateStatus(true);
+                addResult('✅ Conexión establecida');
+            };
+            
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                console.log('Mensaje recibido:', msg);
+                
+                if (msg.type === 'welcome') {
+                    addResult(`🎉 ${msg.message}`, false);
+                } else if (msg.type === 'prediction') {
+                    showPrediction(msg);
+                } else if (msg.type === 'emotions') {
+                    showEmotions(msg);
+                } else if (msg.type === 'model_info') {
+                    addResult(msg.info, true);
+                } else if (msg.type === 'health') {
+                    addResult(`💚 Estado: ${msg.status} | Clientes: ${msg.clients_connected}`);
+                } else if (msg.type === 'error') {
+                    addResult(`❌ Error: ${msg.message}`);
+                } else {
+                    addResult(msg, true);
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addResult('❌ Error de conexión');
+            };
+            
+            ws.onclose = () => {
+                updateStatus(false);
+                addResult('🔌 Conexión cerrada');
+            };
+        }
+
+        function showPrediction(result) {
+            const html = `
+                <div class="emotion-result">
+                    <div style="font-size: 48px; margin-bottom: 10px;">
+                        ${getEmotionEmoji(result.emotion_name)}
+                    </div>
+                    <div style="font-size: 28px; font-weight: bold;">
+                        ${result.emotion_name.toUpperCase()}
+                    </div>
+                    <div class="confidence">
+                        Confianza: ${(result.confidence * 100).toFixed(2)}%
+                    </div>
+                    <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
+                        ⏱️ ${result.processing_time_ms}ms
+                    </div>
+                </div>
+            `;
+            addResult(html);
+        }
+
+        function showEmotions(result) {
+            const emotions = result.emotions.map(e => 
+                `${getEmotionEmoji(e.name)} <strong>${e.name}</strong>: ${e.description}`
+            ).join('<br>');
+            addResult(`<div style="line-height: 2;">${emotions}</div>`);
+        }
+
+        function getEmotionEmoji(emotion) {
+            const emojis = {
+                'angry': '😠',
+                'disgust': '🤢',
+                'fear': '😨',
+                'happy': '😄',
+                'neutral': '😐',
+                'sad': '😢',
+                'surprise': '😲'
+            };
+            return emojis[emotion] || '😶';
+        }
+
+        async function predict() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('Conecta primero al servidor');
+                connect();
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Selecciona una imagen primero');
+                return;
+            }
+
+            addResult(`📤 Enviando imagen: ${file.name}...`);
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                
+                ws.send(JSON.stringify({
+                    command: 'predict',
+                    image: base64
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function getEmotions() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('Conecta primero al servidor');
+                return;
+            }
+
+            ws.send(JSON.stringify({
+                command: 'emotions'
+            }));
+        }
+
+        async function getModelInfo() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('Conecta primero al servidor');
+                return;
+            }
+
+            ws.send(JSON.stringify({
+                command: 'model_info'
+            }));
+        }
+
+        // Auto-conectar al cargar
+        window.onload = () => {
+            setTimeout(connect, 500);
+        };
+    </script>
+</body>
+</html>

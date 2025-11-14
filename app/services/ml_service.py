@@ -8,6 +8,7 @@ import tensorflow as tf
 from tensorflow import keras
 from typing import Tuple, Optional
 import os
+from pathlib import Path
 from app.config.settings import settings
 from app.utils.logger import logger
 
@@ -51,15 +52,34 @@ class MLService:
             FileNotFoundError: Si el modelo no existe
             Exception: Si hay error al cargar el modelo
         """
-        model_path = settings.MODEL_PATH
+        # Construir ruta absoluta al modelo
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        model_path = base_dir / settings.MODEL_PATH
         
-        if not os.path.exists(model_path):
+        if not model_path.exists():
             logger.error(f"Modelo no encontrado en: {model_path}")
             raise FileNotFoundError(f"Modelo no encontrado: {model_path}")
         
         try:
             logger.info(f"Cargando modelo desde: {model_path}")
-            self._model = keras.models.load_model(model_path)
+            
+            # Keras 3.x requiere formato ZIP para .keras
+            # Si es HDF5, usar load_model con safe_mode=False
+            try:
+                self._model = tf.keras.models.load_model(
+                    str(model_path),
+                    compile=False,
+                    safe_mode=False
+                )
+            except Exception as e_keras3:
+                # Fallback: intentar con h5py para modelos antiguos
+                logger.warning(f"Intento Keras 3 falló, usando h5: {e_keras3}")
+                import h5py
+                self._model = tf.keras.models.load_model(
+                    str(model_path),
+                    compile=False
+                )
+            
             logger.info(" Modelo cargado exitosamente")
             
             # Verificar arquitectura del modelo
