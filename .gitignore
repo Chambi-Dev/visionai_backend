@@ -1,40 +1,241 @@
+# ============================================
+# Python
+# ============================================
 # Entorno Virtual
-/venv
+venv/
 .venv/
 env/
+ENV/
 env.bak/
 venv.bak/
 
-# Archivos de caché y compilados
-pycache/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
 
-# Archivos de configuración del IDE
-vscode/
+# Distribuciones
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.whl
+
+# ============================================
+# IDE y Editores
+# ============================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
 .idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
 *.swp
 *.swo
+*~
 
-# Variables de entorno
+# ============================================
+# Variables de Entorno y Configuración
+# ============================================
 .env
 .env.*
 !.env.example
+*.local
 
-# Logs
-*.log
-logs/
+# Configuraciones sensibles
+config.local.py
+settings.local.py
+secrets.json
 
-# Archivos de base de datos local
+# ============================================
+# Base de Datos
+# ============================================
+# SQLite
 *.sqlite3
 *.db
+*.sqlite
 
-# Reportes de testing y cobertura
+# PostgreSQL
+*.dump
+*.sql.backup
+
+# Archivos de migración temporales
+alembic/versions/__pycache__/
+
+# ============================================
+# Logs y Debugging
+# ============================================
+*.log
+logs/
+*.log.*
+log/
+debug.log
+error.log
+
+# ============================================
+# Testing y Cobertura
+# ============================================
 .coverage
+.coverage.*
 htmlcov/
 .pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+test-results/
 
-# Archivos de sistema operativo
+# ============================================
+# Machine Learning y Modelos
+# ============================================
+# Modelos grandes (comentar si quieres versionar)
+# ml_models/*.h5
+# ml_models/*.keras
+# ml_models/*.pkl
+
+# Checkpoints de entrenamiento
+checkpoints/
+*.ckpt
+*.pth
+*.weights
+
+# Datasets (no versionar datasets grandes)
+datasets/
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.hdf5
+
+# TensorBoard
+runs/
+tensorboard/
+
+# ============================================
+# Archivos Temporales
+# ============================================
+# Sistema operativo
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Windows
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ============================================
+# Docker
+# ============================================
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# ============================================
+# Jupyter Notebooks
+# ============================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ============================================
+# Archivos de Upload/Imágenes
+# ============================================
+# Imágenes subidas por usuarios (si aplica)
+uploads/
+static/uploads/
+media/
+
+# ============================================
+# Dependencias y Paquetes
+# ============================================
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Poetry
+poetry.lock
+
+# Pipenv
+Pipfile.lock
+
+# ============================================
+# Documentación
+# ============================================
+# Sphinx
+docs/_build/
+site/
+
+# ============================================
+# Específico del Proyecto
+# ============================================
+# Carpeta de ejemplos (opcional, comentar si quieres versionar)
+# examples/
+
+# Archivos de prueba temporal
+test_images/
+test_*.jpg
+test_*.png
+
+# Backups
+*.backup
+backup_*
+
+# ============================================
+# CI/CD
+# ============================================
+.github/workflows/*.log
+
+# ============================================
+# Otros
+# ============================================
+# Archivos comprimidos
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Certificados y claves
+*.pem
+*.key
+*.crt
+*.cert
+
+# Node (si usas alguna herramienta de frontend)
+node_modules/
+package-lock.json
+
+# MacOS
+.AppleDouble
+.LSOverride

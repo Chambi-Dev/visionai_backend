@@ -13,14 +13,20 @@ class Settings(BaseSettings):
     # Configuración de la API
     API_V1_PREFIX: str = "/api/v1"
     
-    # Configuración de base de datos
-    DATABASE_URL: str = "postgresql+psycopg2://postgres:123@localhost:5432/visionai_db"
+    # Configuración de base de datos (lee de .env, por defecto usa 123)
+    DATABASE_URL: str = (
+        "postgresql+psycopg2://postgres:123@localhost:5432/visionai_db"
+    )
     
     # Configuración del modelo ML
-    MODEL_PATH: str = "ml_models/modelo_emociones.keras"
+    MODEL_PATH: str = "ml_models/modelo_emociones.h5"
     
     # Configuración de CORS
     ALLOWED_ORIGINS: list = ["*"]
+    
+    # Configuración del servidor WebSocket
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
     
     class Config:
         env_file = ".env"
