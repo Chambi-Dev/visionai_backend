@@ -101,7 +101,7 @@ class PredictionService:
                     processing_time_ms=total_time_ms,
                     source_ip=source_ip
                 )
-                logger.info("✅ Predicción guardada en BD")
+                logger.info("Predicción guardada en BD")
             except Exception as e:
                 # No fallar la predicción si falla el guardado
                 logger.error(f"Error al guardar predicción en BD: {e}")
@@ -115,7 +115,7 @@ class PredictionService:
             )
             
             logger.info(
-                f"✅ Predicción exitosa: {emotion_name} "
+                f"Predicción exitosa: {emotion_name} "
                 f"({confidence:.2%}) en {total_time_ms}ms"
             )
             

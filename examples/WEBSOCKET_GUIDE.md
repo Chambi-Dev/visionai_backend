@@ -132,7 +132,7 @@ Al conectar, recibes un mensaje de bienvenida:
 
 ---
 
-## 🐍 Cliente Python
+## Cliente Python
 
 Archivo incluido: **`websocket_client_example.py`**
 
@@ -193,7 +193,7 @@ asyncio.run(predict())
 
 ---
 
-## 🌐 Cliente JavaScript/HTML
+## Cliente JavaScript/HTML
 
 ```html
 <!DOCTYPE html>
@@ -289,7 +289,7 @@ asyncio.run(predict())
 
 ---
 
-## 📊 Ventajas del WebSocket Puro
+## Ventajas del WebSocket Puro
 
 | Característica | WebSocket Puro | FastAPI+REST |
 |---------------|----------------|--------------|
@@ -302,7 +302,7 @@ asyncio.run(predict())
 
 ---
 
-## 🔧 Arquitectura
+## Arquitectura
 
 ```
 Cliente → WebSocket → handle_client()
@@ -322,7 +322,7 @@ Cliente → WebSocket → handle_client()
 
 ---
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### Error: "No module named 'websockets'"
 ```bash
@@ -345,7 +345,7 @@ pip install websockets
 
 ---
 
-## 📝 Cambios vs FastAPI
+## Cambios vs FastAPI
 
 | Antes (FastAPI) | Ahora (WebSocket) |
 |----------------|-------------------|
@@ -357,16 +357,16 @@ pip install websockets
 
 ---
 
-## 🚀 Casos de Uso
+## Casos de Uso
 
-✅ **Ideal para:**
+**Ideal para:**
 - Stream de video en tiempo real
 - Análisis continuo de cámara web
 - Dashboards en vivo
 - Aplicaciones móviles
 - IoT y edge computing
 
-❌ **No recomendado para:**
+**No recomendado para:**
 - APIs REST públicas
 - Integraciones de terceros
 - Webhooks
@@ -374,12 +374,10 @@ pip install websockets
 
 ---
 
-## 📚 Recursos
+## Recursos
 
 - [Documentación websockets](https://websockets.readthedocs.io/)
 - [WebSocket API MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
 - [RFC 6455 - WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
 
 ---
-
-**¡Sistema 100% WebSocket funcionando! 🚀**

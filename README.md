@@ -1,57 +1,77 @@
-# VisionAI Backend - WebSocket Server
+# VisionAI Backend - Sistema Híbrido REST + WebSocket
 
-> Sistema de predicción de emociones faciales en tiempo real usando Machine Learning y WebSocket
+> Sistema de predicción de emociones faciales con API REST para estadísticas y WebSocket para stream de cámara en tiempo real
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![WebSocket](https://img.shields.io/badge/WebSocket-13.1-green.svg)](https://websockets.readthedocs.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com/)
+[![WebSocket](https://img.shields.io/badge/WebSocket-13.1-blue.svg)](https://websockets.readthedocs.io/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15+-orange.svg)](https://www.tensorflow.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 📋 Descripción
+## Descripción
 
-VisionAI Backend es un servidor WebSocket de alto rendimiento que utiliza Deep Learning para detectar emociones faciales en tiempo real. El sistema analiza imágenes y clasifica expresiones faciales en 7 emociones diferentes con alta precisión.
+VisionAI Backend es un sistema híbrido que combina:
+- **API REST (FastAPI)** - Para estadísticas, dashboard y predicciones de imágenes estáticas
+- **WebSocket** - Para stream de cámara en tiempo real con latencia ultra-baja
 
-### ✨ Características Principales
+El sistema utiliza Deep Learning para detectar emociones faciales y clasifica expresiones en 7 emociones diferentes.
 
-- 🚀 **WebSocket Nativo** - Comunicación bidireccional en tiempo real sin FastAPI
-- 🧠 **Deep Learning** - Red neuronal convolucional entrenada con 48x48 píxeles
-- 🎯 **7 Emociones** - Detecta: angry, disgust, fear, happy, neutral, sad, surprise
-- 💾 **Persistencia** - Almacena predicciones en PostgreSQL con SQLAlchemy
-- 📊 **Logging** - Sistema completo de logs para debugging y monitoreo
-- ⚡ **Alto Rendimiento** - Latencia < 10ms, 100+ predicciones/segundo
-- 🔌 **Múltiples Clientes** - Soporte para conexiones simultáneas
+### Características Principales
 
-## 🏗️ Arquitectura
+- **API REST** - Endpoints para estadísticas, dashboard y predicciones
+- **WebSocket** - Stream de cámara en tiempo real (< 10ms latencia)
+- **Deep Learning** - CNN entrenada para 7 emociones
+- **7 Emociones** - angry, disgust, fear, happy, neutral, sad, surprise
+- **Persistencia** - PostgreSQL con SQLAlchemy
+- **Dashboard** - Estadísticas y analytics completos
+- **Documentación** - Swagger UI automática en `/docs`
+- **Alto Rendimiento** - 100+ predicciones/segundo
+
+## Arquitectura
 
 ```
-┌─────────────┐
-│   Cliente   │ (Frontend/App)
-└──────┬──────┘
-       │ WebSocket
-       │ ws://localhost:8000
-       ↓
-┌─────────────────────────────────┐
-│   VisionAI WebSocket Server     │
-│  (app/main.py)                   │
-├─────────────────────────────────┤
-│  Handler de Comandos:            │
-│  • predict   → Predicción ML     │
-│  • emotions  → Lista emociones   │
-│  • model_info→ Info del modelo   │
-│  • health    → Health check      │
-└──────┬──────────────────────────┘
-       │
-       ├──→ prediction_service.py (Lógica de negocio)
-       │    └──→ ml_service.py (Modelo ML)
-       │         └──→ modelo_emociones.h5
-       │
-       └──→ PostgreSQL (Base de datos)
-            ├── predictions_log
-            ├── emotion_classes
-            └── model_versions
+┌─────────────────────────────────────────────┐
+│            Frontend/Cliente                  │
+└────────┬────────────────────┬────────────────┘
+         │                    │
+         │ REST API           │ WebSocket
+         │ (Estadísticas)     │ (Cámara en vivo)
+         ↓                    ↓
+┌────────────────────────────────────────────────┐
+│       VisionAI Backend (FastAPI + WS)          │
+├────────────────────────────────────────────────┤
+│  REST API:                  WebSocket:         │
+│  • GET  /api/v1/predict     • ws://host/ws     │
+│  • GET  /api/v1/emotions    • predict          │
+│  • GET  /api/v1/model/info  • emotions         │
+│  • GET  /api/v1/dashboard/* • model_info       │
+│  • GET  /api/v1/health      • health           │
+└────────┬───────────────────────────────────────┘
+         │
+         ├──→ prediction_service.py
+         │    └──→ ml_service.py → modelo_emociones.h5
+         │
+         └──→ PostgreSQL
+              ├── predictions_log
+              ├── emotion_classes
+              └── model_versions
 ```
 
-## 🚀 Inicio Rápido
+## Casos de Uso
+
+### REST API - Para:
+- **Dashboard web** - Obtener estadísticas y gráficos
+- **Upload de imágenes** - Analizar fotos estáticas
+- **Analytics** - Consultar histórico y métricas
+- **Reportes** - Generar informes de uso
+
+### WebSocket - Para:
+- **Stream de cámara** - Análisis en tiempo real
+- **Apps interactivas** - Juegos con detección facial
+- **Bots** - Respuesta en tiempo real a emociones
+- **Apps móviles** - Detección continua
+
+## Inicio Rápido
 
 ### Prerequisitos
 
@@ -103,11 +123,139 @@ alembic upgrade head
 python -m app.main
 ```
 
-El servidor estará disponible en: **`ws://localhost:8000`**
+El servidor estará disponible en:
+- **REST API:** http://localhost:8000
+- **Documentación:** http://localhost:8000/docs
+- **WebSocket:** ws://localhost:8000/ws
 
-## 📡 Uso del WebSocket
+## API REST
 
-### Conectar al Servidor
+### Documentación Interactiva
+
+Accede a la documentación Swagger en: **http://localhost:8000/docs**
+
+### Endpoints Principales
+
+#### 1. Predicción (Upload de Imagen)
+
+```bash
+POST /api/v1/predict
+Content-Type: multipart/form-data
+
+curl -X POST "http://localhost:8000/api/v1/predict" \
+  -F "file=@imagen.jpg"
+```
+
+**Respuesta:**
+```json
+{
+  "emotion_name": "happy",
+  "confidence": 0.9234,
+  "model_version_tag": "v1.0.0",
+  "processing_time_ms": 145
+}
+```
+
+#### 2. Listar Emociones
+
+```bash
+GET /api/v1/emotions
+
+curl "http://localhost:8000/api/v1/emotions"
+```
+
+#### 3. Información del Modelo
+
+```bash
+GET /api/v1/model/info
+
+curl "http://localhost:8000/api/v1/model/info"
+```
+
+#### 4. Health Check
+
+```bash
+GET /api/v1/health
+
+curl "http://localhost:8000/api/v1/health"
+```
+
+### Endpoints de Dashboard
+
+#### Estadísticas Generales
+
+```bash
+GET /api/v1/dashboard/stats
+```
+
+**Respuesta:**
+```json
+{
+  "total_predictions": 1523,
+  "most_common_emotion": {
+    "name": "happy",
+    "count": 542
+  },
+  "average_confidence": 0.8756,
+  "predictions_by_emotion": {
+    "happy": 542,
+    "neutral": 389,
+    "sad": 234
+  }
+}
+```
+
+#### Predicciones Recientes
+
+```bash
+GET /api/v1/dashboard/recent?limit=10
+```
+
+#### Timeline de Predicciones
+
+```bash
+GET /api/v1/dashboard/timeline?days=7
+```
+
+#### Estadísticas por Emoción
+
+```bash
+GET /api/v1/dashboard/emotion/{emotion_name}
+```
+
+## 🔌 WebSocket (Stream de Cámara)
+
+## 🔌 WebSocket (Stream de Cámara)
+
+### Conectar al WebSocket
+
+**Ruta:** `ws://localhost:8000/ws`
+
+**JavaScript:**
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws');
+
+ws.onopen = () => {
+    console.log('Conectado al stream de cámara');
+};
+
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    
+    if (data.type === 'prediction') {
+        console.log('Emoción:', data.emotion_name);
+        console.log('Confianza:', data.confidence);
+    }
+};
+
+// Enviar frame de cámara
+function sendFrame(imageBase64) {
+    ws.send(JSON.stringify({
+        command: 'predict',
+        image: imageBase64  // Sin prefijo data:image
+    }));
+}
+```
 
 **JavaScript:**
 ```javascript
@@ -234,7 +382,7 @@ asyncio.run(connect())
 }
 ```
 
-## 🧪 Pruebas
+## Pruebas
 
 ### Cliente Python de Ejemplo
 
@@ -259,7 +407,7 @@ python examples/websocket_client_example.py --folder ./imagenes/
 
 Abre `examples/test_websocket.html` en tu navegador para probar la API visualmente.
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 visionai_backend/
@@ -289,7 +437,7 @@ visionai_backend/
 └── README.md
 ```
 
-## 🔧 Configuración
+## Configuración
 
 ### Variables de Entorno
 
@@ -320,7 +468,7 @@ El proyecto usa variables de entorno para configuración sensible como contrase�
 
 3. **Importante:** El archivo `.env` está en `.gitignore` y **NUNCA** se sube a Git por seguridad.
 
-#### 🔐 Gestión de Contraseñas
+#### Gestión de Contraseñas
 
 - **`.env.example`** - Archivo de plantilla con contraseña por defecto `123` (se sube a Git)
 - **`.env`** - Tu configuración local con tu contraseña real (NO se sube a Git)
@@ -351,7 +499,7 @@ El proyecto usa PostgreSQL con las siguientes tablas:
 - **model_versions** - Versiones del modelo ML
 - **predictions_log** - Historial de predicciones
 
-## 📊 Modelo de Machine Learning
+## Modelo de Machine Learning
 
 - **Arquitectura:** CNN (Convolutional Neural Network)
 - **Input:** Imágenes 96x96x3 (RGB)
@@ -368,7 +516,7 @@ El proyecto usa PostgreSQL con las siguientes tablas:
 4. Normalización [0, 1]
 5. Expansión de dimensiones (batch)
 
-## 🚀 Despliegue en Producción
+## Despliegue en Producción
 
 ### Docker (Recomendado)
 
@@ -408,7 +556,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-## 📈 Rendimiento
+## Rendimiento
 
 | Métrica | Valor |
 |---------|-------|
@@ -418,7 +566,7 @@ WantedBy=multi-user.target
 | **Clientes simultáneos** | 1000+ |
 | **Tamaño de modelo** | 37MB |
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### Servidor no inicia
 
@@ -474,7 +622,7 @@ ls -lh ml_models/modelo_emociones.h5
 # Ya está incluido en el código
 ```
 
-## 🤝 Contribución
+## Contribución
 
 Las contribuciones son bienvenidas. Por favor:
 
@@ -484,7 +632,7 @@ Las contribuciones son bienvenidas. Por favor:
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Abre un Pull Request
 
-## 📝 Licencia
+## Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
@@ -492,7 +640,7 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 - **VisionAI Team** - Desarrollo inicial
 
-## 📚 Recursos Adicionales
+## Recursos Adicionales
 
 - [Documentación WebSocket](https://websockets.readthedocs.io/)
 - [TensorFlow Guide](https://www.tensorflow.org/guide)
@@ -500,6 +648,3 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 - [Guía completa de uso](examples/WEBSOCKET_GUIDE.md)
 
 ---
-
-**🎭 VisionAI - Detección de emociones en tiempo real con WebSocket** 🚀
-
