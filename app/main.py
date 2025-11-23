@@ -180,18 +180,17 @@ async def handle_health_check(websocket):
     }))
 
 
-async def handle_client(websocket, path):
+async def handle_client(websocket):
     """
     Maneja la conexión de un cliente WebSocket.
     
     Args:
         websocket: Conexión WebSocket
-        path: Ruta de la conexión
     """
     # Registrar cliente
     connected_clients.add(websocket)
     client_info = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
-    logger.info(f"✅ Cliente conectado: {client_info} (Total: {len(connected_clients)})")
+    logger.info(f" Cliente conectado: {client_info} (Total: {len(connected_clients)})")
     
     # Obtener sesión de base de datos
     db = SessionLocal()
@@ -247,7 +246,7 @@ async def handle_client(websocket, path):
     except websockets.exceptions.ConnectionClosed:
         logger.info(f"🔌 Cliente desconectado: {client_info}")
     except Exception as e:
-        logger.error(f"❌ Error en conexión: {e}", exc_info=True)
+        logger.error(f" Error en conexión: {e}", exc_info=True)
     finally:
         # Limpiar recursos
         connected_clients.discard(websocket)
@@ -258,16 +257,16 @@ async def handle_client(websocket, path):
 async def main():
     """Función principal del servidor."""
     logger.info("=" * 60)
-    logger.info("🚀 VisionAI WebSocket Server")
+    logger.info(" VisionAI WebSocket Server")
     logger.info("=" * 60)
     
     # Cargar modelo ML
     try:
-        logger.info("📦 Cargando modelo de Machine Learning...")
+        logger.info(" Cargando modelo de Machine Learning...")
         model_info = ml_service.get_model_info()
-        logger.info(f"✅ Modelo cargado: {model_info.get('status')}")
+        logger.info(f" Modelo cargado: {model_info.get('status')}")
     except Exception as e:
-        logger.error(f"❌ Error al cargar modelo: {e}")
+        logger.error(f" Error al cargar modelo: {e}")
         return
     
     # Iniciar servidor WebSocket
@@ -275,8 +274,8 @@ async def main():
     
     async with websockets.serve(handle_client, HOST, PORT):
         logger.info("=" * 60)
-        logger.info(f"✅ Servidor activo en ws://{HOST}:{PORT}")
-        logger.info("📡 Esperando conexiones de clientes...")
+        logger.info(f" Servidor activo en ws://{HOST}:{PORT}")
+        logger.info(" Esperando conexiones de clientes...")
         logger.info("=" * 60)
         logger.info("")
         logger.info("Comandos disponibles:")
