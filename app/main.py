@@ -20,7 +20,7 @@ from app.services.ml_service import ml_service
 from app.models.database_models import EmotionClass
 
 # Importar rutas REST
-from app.api.routes import predictions, health, dashboard
+from app.api.routes import predictions, health, dashboard, auth
 
 
 # Crear aplicación FastAPI
@@ -40,9 +40,26 @@ app.add_middleware(
 )
 
 # Incluir rutas REST
-app.include_router(predictions.router, prefix=settings.API_V1_PREFIX, tags=["Predictions"])
-app.include_router(health.router, prefix=settings.API_V1_PREFIX, tags=["Health"])
-app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX, tags=["Dashboard"])
+app.include_router(
+    predictions.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Predictions"]
+)
+app.include_router(
+    health.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Health"]
+)
+app.include_router(
+    dashboard.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Dashboard"]
+)
+app.include_router(
+    auth.router,
+    prefix=settings.API_V1_PREFIX + "/auth",
+    tags=["Authentication"]
+)
 
 # Clientes WebSocket conectados
 connected_clients: Set[WebSocket] = set()

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Autenticación - VisionAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button[type="submit"]:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+            display: block;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            display: block;
+        }
+        .token-display {
+            margin-top: 15px;
+            padding: 15px;
+            background: #2d3748;
+            color: #68d391;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .user-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .user-info p {
+            margin: 5px 0;
+        }
+        .verify-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .verify-section h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-secondary {
+            flex: 1;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test de Autenticación</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('register')">Registro</button>
+            <button class="tab" onclick="showTab('login')">Login</button>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div id="register" class="form-section active">
+            <form onsubmit="register(event)">
+                <div class="form-group">
+                    <label>👤 Username:</label>
+                    <input type="text" id="reg-username" required minlength="3" maxlength="50" placeholder="Ej: usuario123">
+                </div>
+                <div class="form-group">
+                    <label>🔒 Contraseña:</label>
+                    <input type="password" id="reg-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit">Registrar Usuario</button>
+            </form>
+        </div>
+
+        <!-- Formulario de Login -->
+        <div id="login" class="form-section">
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label>👤 Username:</label>
+                    <input type="text" id="login-username" required placeholder="Tu username">
+                </div>
+                <div class="form-group">
+                    <label>🔒 Contraseña:</label>
+                    <input type="password" id="login-password" required placeholder="Tu contraseña">
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+        </div>
+
+        <div id="result" class="result"></div>
+
+        <!-- Sección de verificación de token -->
+        <div class="verify-section" id="verify-section" style="display: none;">
+            <h3>🔍 Verificar Token</h3>
+            <p>Token guardado en sesión</p>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="verifyToken()">Verificar Token</button>
+                <button class="btn-secondary" onclick="getProfile()">Ver Perfil</button>
+                <button class="btn-secondary" onclick="clearToken()">Limpiar Token</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1/auth';
+        let currentToken = null;
+
+        function showTab(tabName) {
+            // Ocultar todos los formularios
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remover active de todos los tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar el seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Limpiar resultado
+            hideResult();
+        }
+
+        function hideResult() {
+            const result = document.getElementById('result');
+            result.style.display = 'none';
+            result.className = 'result';
+        }
+
+        function showSuccess(message, data = null) {
+            const result = document.getElementById('result');
+            result.className = 'result success';
+            result.innerHTML = `<strong>✅ Éxito:</strong> ${message}`;
+            
+            if (data) {
+                if (data.access_token) {
+                    currentToken = data.access_token;
+                    result.innerHTML += `<div class="token-display">Token: ${data.access_token.substring(0, 50)}...</div>`;
+                    document.getElementById('verify-section').style.display = 'block';
+                }
+                if (data.user_id) {
+                    result.innerHTML += `
+                        <div class="user-info">
+                            <p><strong>ID:</strong> ${data.user_id}</p>
+                            <p><strong>Username:</strong> ${data.username}</p>
+                            <p><strong>Activo:</strong> ${data.is_active ? 'Sí' : 'No'}</p>
+                            <p><strong>Creado:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function showError(message) {
+            const result = document.getElementById('result');
+            result.className = 'result error';
+            result.innerHTML = `<strong>❌ Error:</strong> ${message}`;
+        }
+
+        async function register(event) {
+            event.preventDefault();
+            hideResult();
+            
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Usuario registrado correctamente', data);
+                } else {
+                    showError(data.detail || 'Error al registrar usuario');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        async function login(event) {
+            event.preventDefault();
+            hideResult();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Login exitoso', data);
+                } else {
+                    showError(data.detail || 'Error al iniciar sesión');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        async function verifyToken() {
+            if (!currentToken) {
+                showError('No hay token para verificar. Inicia sesión primero.');
+                return;
+            }
+            
+            hideResult();
+            
+            try {
+                const response = await fetch(`${API_URL}/verify?token=${encodeURIComponent(currentToken)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Token válido', data);
+                } else {
+                    showError(data.detail || 'Token inválido');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        async function getProfile() {
+            if (!currentToken) {
+                showError('No hay token. Inicia sesión primero.');
+                return;
+            }
+            
+            hideResult();
+            
+            try {
+                const response = await fetch(`${API_URL}/users/me?token=${encodeURIComponent(currentToken)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Perfil obtenido', data);
+                } else {
+                    showError(data.detail || 'Error al obtener perfil');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        function clearToken() {
+            currentToken = null;
+            document.getElementById('verify-section').style.display = 'none';
+            hideResult();
+            showSuccess('Token eliminado de la sesión');
+        }
+    </script>
+</body>
+</html>

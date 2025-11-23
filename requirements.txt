@@ -22,3 +22,9 @@ alembic==1.14.0
 python-dotenv==1.0.1
 pydantic==2.9.2
 pydantic-settings==2.6.0
+
+# Autenticación y Seguridad
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1  # Versión compatible con passlib
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.18
