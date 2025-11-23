@@ -223,9 +223,7 @@ GET /api/v1/dashboard/timeline?days=7
 GET /api/v1/dashboard/emotion/{emotion_name}
 ```
 
-## 🔌 WebSocket (Stream de Cámara)
-
-## 🔌 WebSocket (Stream de Cámara)
+## WebSocket (Stream de Cámara)
 
 ### Conectar al WebSocket
 
@@ -636,7 +634,7 @@ Las contribuciones son bienvenidas. Por favor:
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-## 👥 Autores
+## Autores
 
 - **VisionAI Team** - Desarrollo inicial
 
