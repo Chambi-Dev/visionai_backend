@@ -56,18 +56,18 @@ async def predict_emotion(
             print(json.dumps(result, indent=2, ensure_ascii=False))
             
             if result.get("status") == "success":
-                print(f"\n🎭 Emoción: {result['emotion_name']}")
-                print(f"📊 Confianza: {result['confidence']:.2%}")
-                print(f"⏱️  Tiempo: {result['processing_time_ms']}ms")
+                print(f"\nEmoción: {result['emotion_name']}")
+                print(f"Confianza: {result['confidence']:.2%}")
+                print(f"Tiempo: {result['processing_time_ms']}ms")
             else:
-                print(f"\n❌ Error: {result.get('message')}")
+                print(f"\nError: {result.get('message')}")
     
     except FileNotFoundError:
-        print(f"❌ Error: Imagen no encontrada '{image_path}'")
+        print(f"Error: Imagen no encontrada '{image_path}'")
     except websockets.exceptions.WebSocketException as e:
-        print(f"❌ Error de WebSocket: {e}")
+        print(f"Error de WebSocket: {e}")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 async def get_emotions(server_url: str = "ws://localhost:8000"):
@@ -84,12 +84,12 @@ async def get_emotions(server_url: str = "ws://localhost:8000"):
             response = await websocket.recv()
             result = json.loads(response)
             
-            print("📋 Emociones disponibles:")
+            print("Emociones disponibles:")
             for emotion in result.get("emotions", []):
                 print(f"  • {emotion['name']}: {emotion['description']}")
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 async def get_model_info(server_url: str = "ws://localhost:8000"):
@@ -106,11 +106,11 @@ async def get_model_info(server_url: str = "ws://localhost:8000"):
             response = await websocket.recv()
             result = json.loads(response)
             
-            print("🤖 Información del modelo:")
+            print("Información del modelo:")
             print(json.dumps(result.get("info", {}), indent=2))
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 async def health_check(server_url: str = "ws://localhost:8000"):
@@ -127,11 +127,11 @@ async def health_check(server_url: str = "ws://localhost:8000"):
             response = await websocket.recv()
             result = json.loads(response)
             
-            print(f"💚 Estado: {result.get('status')}")
-            print(f"🔌 Clientes: {result.get('clients_connected')}")
+            print(f"Estado: {result.get('status')}")
+            print(f"Clientes: {result.get('clients_connected')}")
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 async def continuous_prediction(
@@ -155,17 +155,17 @@ async def continuous_prediction(
         )
         
         if not images:
-            print(f"❌ No hay imágenes en '{image_folder}'")
+            print(f"No hay imágenes en '{image_folder}'")
             return
         
         # Conectar al WebSocket
         async with websockets.connect(server_url) as websocket:
-            print(f"✓ Conectado a {server_url}")
+            print(f"Conectado a {server_url}")
             
             # Recibir bienvenida
             await websocket.recv()
             
-            print(f"📁 Procesando {len(images)} imágenes...\n")
+            print(f"Procesando {len(images)} imágenes...\n")
             
             for i, image_path in enumerate(images, 1):
                 # Leer y codificar imagen
@@ -198,14 +198,14 @@ async def continuous_prediction(
                 # Pausa entre imágenes
                 await asyncio.sleep(0.3)
             
-            print("✓ Todas las imágenes procesadas")
+            print("Todas las imágenes procesadas")
     
     except FileNotFoundError:
-        print(f"❌ Carpeta no encontrada '{image_folder}'")
+        print(f"Carpeta no encontrada '{image_folder}'")
     except websockets.exceptions.WebSocketException as e:
-        print(f"❌ Error de WebSocket: {e}")
+        print(f"Error de WebSocket: {e}")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 def main():
@@ -213,7 +213,7 @@ def main():
     import sys
     
     print("=" * 60)
-    print("🚀 Cliente WebSocket VisionAI")
+    print("Cliente WebSocket VisionAI")
     print("=" * 60)
     print()
     
@@ -234,7 +234,7 @@ def main():
     # Procesar argumentos
     if sys.argv[1] == "--folder":
         if len(sys.argv) < 3:
-            print("❌ Error: Especifica la carpeta")
+            print("Error: Especifica la carpeta")
             return
         asyncio.run(continuous_prediction(sys.argv[2]))
     elif sys.argv[1] == "--emotions":
@@ -249,4 +249,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+    

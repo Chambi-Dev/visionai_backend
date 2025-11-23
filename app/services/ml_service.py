@@ -80,7 +80,7 @@ class MLService:
                     compile=False
                 )
             
-            logger.info(" Modelo cargado exitosamente")
+            logger.info("Modelo cargado exitosamente")
             
             # Verificar arquitectura del modelo
             input_shape = self._model.input_shape
@@ -91,10 +91,10 @@ class MLService:
             
             # Validar que coincida con lo esperado
             if input_shape != (None, 96, 96, 3):
-                logger.warning(f" Input shape inesperado: {input_shape}")
+                logger.warning(f"Input shape inesperado: {input_shape}")
             
             if output_shape != (None, 7):
-                logger.warning(f" Output shape inesperado: {output_shape}")
+                logger.warning(f"Output shape inesperado: {output_shape}")
                 
         except Exception as e:
             logger.error(f"Error al cargar el modelo: {e}")

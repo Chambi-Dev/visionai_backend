@@ -133,10 +133,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎭 VisionAI WebSocket Test</h1>
+        <h1>VisionAI WebSocket Test</h1>
         
         <div id="status" class="status disconnected">
-            ❌ Desconectado
+            Desconectado
         </div>
 
         <div class="file-input">
@@ -144,10 +144,10 @@
         </div>
 
         <div class="buttons">
-            <button class="btn-primary" onclick="connect()">🔌 Conectar</button>
-            <button class="btn-success" onclick="predict()">🎯 Predecir</button>
-            <button class="btn-info" onclick="getEmotions()">📋 Emociones</button>
-            <button class="btn-warning" onclick="getModelInfo()">🤖 Modelo</button>
+            <button class="btn-primary" onclick="connect()">Conectar</button>
+            <button class="btn-success" onclick="predict()">Predecir</button>
+            <button class="btn-info" onclick="getEmotions()">Emociones</button>
+            <button class="btn-warning" onclick="getModelInfo()">Modelo</button>
         </div>
 
         <div id="result"></div>
@@ -161,10 +161,10 @@
         function updateStatus(connected) {
             if (connected) {
                 statusDiv.className = 'status connected';
-                statusDiv.innerHTML = '✅ Conectado a ws://localhost:8000';
+                statusDiv.innerHTML = 'Conectado a ws://localhost:8000/ws';
             } else {
                 statusDiv.className = 'status disconnected';
-                statusDiv.innerHTML = '❌ Desconectado';
+                statusDiv.innerHTML = 'Desconectado';
             }
         }
 
@@ -183,23 +183,23 @@
 
         function connect() {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                addResult('⚠️ Ya estás conectado');
+                addResult('Ya estás conectado');
                 return;
             }
 
-            ws = new WebSocket('ws://localhost:8000');
+            ws = new WebSocket('ws://localhost:8000/ws');
             
             ws.onopen = () => {
                 updateStatus(true);
-                addResult('✅ Conexión establecida');
+                addResult('Conexión establecida');
             };
             
             ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
                 console.log('Mensaje recibido:', msg);
                 
-                if (msg.type === 'welcome') {
-                    addResult(`🎉 ${msg.message}`, false);
+                if (msg.type === 'connection') {
+                    addResult(`${msg.message}`, false);
                 } else if (msg.type === 'prediction') {
                     showPrediction(msg);
                 } else if (msg.type === 'emotions') {
@@ -207,9 +207,9 @@
                 } else if (msg.type === 'model_info') {
                     addResult(msg.info, true);
                 } else if (msg.type === 'health') {
-                    addResult(`💚 Estado: ${msg.status} | Clientes: ${msg.clients_connected}`);
+                    addResult(`Estado: ${msg.status} | Clientes: ${msg.clients_connected}`);
                 } else if (msg.type === 'error') {
-                    addResult(`❌ Error: ${msg.message}`);
+                    addResult(`Error: ${msg.message}`);
                 } else {
                     addResult(msg, true);
                 }
@@ -217,12 +217,12 @@
             
             ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
-                addResult('❌ Error de conexión');
+                addResult('Error de conexión');
             };
             
             ws.onclose = () => {
                 updateStatus(false);
-                addResult('🔌 Conexión cerrada');
+                addResult('Conexión cerrada');
             };
         }
 
@@ -239,7 +239,7 @@
                         Confianza: ${(result.confidence * 100).toFixed(2)}%
                     </div>
                     <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
-                        ⏱️ ${result.processing_time_ms}ms
+                        ${result.processing_time_ms}ms
                     </div>
                 </div>
             `;
@@ -281,7 +281,7 @@
                 return;
             }
 
-            addResult(`📤 Enviando imagen: ${file.name}...`);
+            addResult(`Enviando imagen: ${file.name}...`);
 
             const reader = new FileReader();
             reader.onload = () => {

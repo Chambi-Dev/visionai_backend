@@ -2,7 +2,7 @@
 
 Sistema de predicción de emociones faciales usando Machine Learning con servidor WebSocket nativo.
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ```bash
 # 1. Instalar dependencias
@@ -15,15 +15,15 @@ python -m app.main
 python websocket_client_example.py imagen.jpg
 ```
 
-## 📋 Características
+## Características
 
-- ✅ **WebSocket Puro** - Sin FastAPI, máximo rendimiento
-- ✅ **Tiempo Real** - Conexiones persistentes bidireccionales
-- ✅ **Machine Learning** - Predicción de 7 emociones
-- ✅ **Base de Datos** - Registro automático de predicciones
-- ✅ **Múltiples Comandos** - predict, emotions, model_info, health
+- **WebSocket Puro** - Sin FastAPI, máximo rendimiento
+- **Tiempo Real** - Conexiones persistentes bidireccionales
+- **Machine Learning** - Predicción de 7 emociones
+- **Base de Datos** - Registro automático de predicciones
+- **Múltiples Comandos** - predict, emotions, model_info, health
 
-## 🌐 Endpoints WebSocket
+## Endpoints WebSocket
 
 **Servidor:** `ws://localhost:8000`
 
@@ -36,7 +36,7 @@ python websocket_client_example.py imagen.jpg
 | `model_info` | Info del modelo | - |
 | `health` | Estado del servidor | - |
 
-## 📊 Emociones Detectadas
+## Emociones Detectadas
 
 1. **angry** - Enojo
 2. **disgust** - Disgusto
@@ -46,7 +46,7 @@ python websocket_client_example.py imagen.jpg
 6. **sad** - Tristeza
 7. **surprise** - Sorpresa
 
-## 🐍 Cliente Python
+## Cliente Python
 
 ```bash
 # Predecir una imagen
@@ -65,7 +65,7 @@ python websocket_client_example.py --model-info
 python websocket_client_example.py --health
 ```
 
-## 🌐 Cliente JavaScript
+## Cliente JavaScript
 
 ```javascript
 const ws = new WebSocket('ws://localhost:8000');
@@ -84,7 +84,7 @@ ws.onmessage = (event) => {
 };
 ```
 
-## 🔧 Configuración
+## Configuración
 
 ### Variables de Entorno (.env)
 
@@ -125,7 +125,7 @@ visionai_backend/
 └── README_WEBSOCKET.md
 ```
 
-## 📦 Dependencias Principales
+## Dependencias Principales
 
 - **websockets** - Servidor WebSocket
 - **tensorflow/keras** - Machine Learning
@@ -133,7 +133,7 @@ visionai_backend/
 - **opencv-python** - Procesamiento de imágenes
 - **pillow** - Manipulación de imágenes
 
-## 🔄 Migración desde FastAPI
+## Migración desde FastAPI
 
 | FastAPI | WebSocket Puro |
 |---------|----------------|
@@ -142,7 +142,7 @@ visionai_backend/
 | `http://localhost:8000` | `ws://localhost:8000` |
 | multipart/form-data | JSON + base64 |
 
-## 📖 Documentación Completa
+## Documentación Completa
 
 Ver [`WEBSOCKET_GUIDE.md`](WEBSOCKET_GUIDE.md) para:
 - Protocolo completo de comunicación
@@ -151,7 +151,7 @@ Ver [`WEBSOCKET_GUIDE.md`](WEBSOCKET_GUIDE.md) para:
 - Solución de problemas
 - Casos de uso
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **Servidor no inicia:**
 ```bash
@@ -172,14 +172,14 @@ pip install -r requirements.txt --force-reinstall
 - Confirma codificación base64 correcta
 - Revisa tamaño de imagen
 
-## 📊 Rendimiento
+## Rendimiento
 
 - **Latencia:** <10ms por predicción
 - **Throughput:** 100+ predicciones/segundo
 - **Memoria:** ~500MB (con modelo cargado)
 - **Conexiones:** Hasta 1000 clientes simultáneos
 
-## 🔒 Seguridad
+## Seguridad
 
 Para producción:
 - Usar HTTPS/WSS
@@ -188,14 +188,12 @@ Para producción:
 - Limitar tamaño de imágenes
 - Rate limiting
 
-## 📄 Licencia
+## Licencia
 
 MIT License
 
-## 👥 Autores
+## Autores
 
 VisionAI Team
 
 ---
-
-**🚀 ¡Servidor WebSocket 100% funcional!**
