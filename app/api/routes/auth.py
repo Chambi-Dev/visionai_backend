@@ -56,7 +56,7 @@ async def register_user(
             username=user.username,
             password=user.password
         )
-        logger.info(f"✅ Usuario registrado: {user.username}")
+        logger.info(f"Usuario registrado: {user.username}")
         return db_user
     except Exception as e:
         logger.error(f"Error al registrar usuario: {e}")
@@ -107,7 +107,7 @@ async def login(
         expires_delta=access_token_expires
     )
     
-    logger.info(f"✅ Login exitoso: {credentials.username}")
+    logger.info(f"Login exitoso: {credentials.username}")
     
     return {
         "access_token": access_token,

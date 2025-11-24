@@ -165,7 +165,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Test de Autenticación</h1>
+        <h1>Test de Autenticación</h1>
         
         <div class="tabs">
             <button class="tab active" onclick="showTab('register')">Registro</button>
@@ -176,11 +176,11 @@
         <div id="register" class="form-section active">
             <form onsubmit="register(event)">
                 <div class="form-group">
-                    <label>👤 Username:</label>
+                    <label>Username:</label>
                     <input type="text" id="reg-username" required minlength="3" maxlength="50" placeholder="Ej: usuario123">
                 </div>
                 <div class="form-group">
-                    <label>🔒 Contraseña:</label>
+                    <label>Contraseña:</label>
                     <input type="password" id="reg-password" required minlength="6" placeholder="Mínimo 6 caracteres">
                 </div>
                 <button type="submit">Registrar Usuario</button>
@@ -191,11 +191,11 @@
         <div id="login" class="form-section">
             <form onsubmit="login(event)">
                 <div class="form-group">
-                    <label>👤 Username:</label>
+                    <label>Username:</label>
                     <input type="text" id="login-username" required placeholder="Tu username">
                 </div>
                 <div class="form-group">
-                    <label>🔒 Contraseña:</label>
+                    <label>Contraseña:</label>
                     <input type="password" id="login-password" required placeholder="Tu contraseña">
                 </div>
                 <button type="submit">Iniciar Sesión</button>
@@ -248,7 +248,7 @@
         function showSuccess(message, data = null) {
             const result = document.getElementById('result');
             result.className = 'result success';
-            result.innerHTML = `<strong>✅ Éxito:</strong> ${message}`;
+            result.innerHTML = `<strong>Éxito:</strong> ${message}`;
             
             if (data) {
                 if (data.access_token) {
@@ -272,7 +272,7 @@
         function showError(message) {
             const result = document.getElementById('result');
             result.className = 'result error';
-            result.innerHTML = `<strong>❌ Error:</strong> ${message}`;
+            result.innerHTML = `<strong>Error:</strong> ${message}`;
         }
 
         async function register(event) {
