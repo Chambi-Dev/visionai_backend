@@ -644,5 +644,3 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 - [TensorFlow Guide](https://www.tensorflow.org/guide)
 - [SQLAlchemy Docs](https://docs.sqlalchemy.org/)
 - [Guía completa de uso](examples/WEBSOCKET_GUIDE.md)
-
----
