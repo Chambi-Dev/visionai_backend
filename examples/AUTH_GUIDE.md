@@ -1,19 +1,19 @@
-# 🔐 Sistema de Gestión de Usuarios - VisionAI
+# Sistema de Gestión de Usuarios - VisionAI
 
 Sistema completo de autenticación con JWT para VisionAI Backend.
 
-## ✅ Implementación Completada
+## Implementación Completada
 
 ### 1. **Modelo de Base de Datos**
-- ✅ Tabla `users` creada en PostgreSQL
-- ✅ Campos: `user_id`, `username`, `hashed_password`, `is_active`, `created_at`, `updated_at`
-- ✅ Migración de Alembic aplicada
+- Tabla `users` creada en PostgreSQL
+- Campos: `user_id`, `username`, `hashed_password`, `is_active`, `created_at`, `updated_at`
+- Migración de Alembic aplicada
 
 ### 2. **Servicios de Autenticación**
-- ✅ Hash de contraseñas con bcrypt
-- ✅ Generación de tokens JWT
-- ✅ Verificación de tokens
-- ✅ Autenticación de usuarios
+- Hash de contraseñas con bcrypt
+- Generación de tokens JWT
+- Verificación de tokens
+- Autenticación de usuarios
 
 ### 3. **Endpoints REST**
 ```
@@ -24,9 +24,9 @@ GET  /api/v1/auth/users/me  - Obtener perfil del usuario actual
 ```
 
 ### 4. **Interfaz de Prueba**
-- ✅ `examples/test_auth.html` - Interfaz web para testing
+- `examples/test_auth.html` - Interfaz web para testing
 
-## 🚀 Cómo Probar
+## Cómo Probar
 
 ### Paso 1: Iniciar el Servidor
 
@@ -56,24 +56,24 @@ examples/test_auth.html
 2. Ingresar username (min 3 caracteres)
 3. Ingresar contraseña (min 6 caracteres)
 4. Click en "Registrar Usuario"
-5. ✅ Debe mostrar el usuario creado con su ID
+5. Debe mostrar el usuario creado con su ID
 
 #### B) Iniciar Sesión
 1. Ir a la pestaña "Login"
 2. Ingresar username y contraseña del usuario creado
 3. Click en "Iniciar Sesión"
-4. ✅ Debe mostrar el token JWT generado
-5. ✅ Aparecerá sección de "Verificar Token"
+4. Debe mostrar el token JWT generado
+5. Aparecerá sección de "Verificar Token"
 
 #### C) Verificar Token
 1. Después de hacer login, click en "Verificar Token"
-2. ✅ Debe mostrar información del usuario decodificada del token
+2. Debe mostrar información del usuario decodificada del token
 
 #### D) Ver Perfil
 1. Click en "Ver Perfil"
-2. ✅ Debe mostrar información completa del usuario actual
+2. Debe mostrar información completa del usuario actual
 
-## 📡 Probar con Swagger
+## Probar con Swagger
 
 1. Ir a http://localhost:8000/docs
 2. Buscar la sección "Authentication"
@@ -110,7 +110,7 @@ POST /api/v1/auth/login
 GET /api/v1/auth/verify?token=<TOKEN_AQUI>
 ```
 
-## 📊 Estructura de la BD
+## Estructura de la BD
 
 ```sql
 CREATE TABLE users (
@@ -125,15 +125,15 @@ CREATE TABLE users (
 CREATE INDEX ix_users_username ON users(username);
 ```
 
-## 🔒 Seguridad
+## Seguridad
 
-- ✅ Contraseñas hasheadas con bcrypt
-- ✅ Tokens JWT con expiración (24 horas)
-- ✅ Username único en base de datos
-- ✅ Validación de longitud mínima (username: 3, password: 6)
-- ⚠️ **SECRET_KEY en producción:** Cambiar en `auth_service.py`
+- Contraseñas hasheadas con bcrypt
+- Tokens JWT con expiración (24 horas)
+- Username único en base de datos
+- Validación de longitud mínima (username: 3, password: 6)
+- **SECRET_KEY en producción:** Cambiar en `auth_service.py`
 
-## 📝 Ejemplos de Uso con cURL
+## Ejemplos de Uso con cURL
 
 ### Registrar:
 ```bash
@@ -154,21 +154,21 @@ curl -X POST "http://localhost:8000/api/v1/auth/login" \
 curl "http://localhost:8000/api/v1/auth/verify?token=TU_TOKEN_AQUI"
 ```
 
-## 🧪 Casos de Prueba
+## Casos de Prueba
 
-### ✅ Casos Exitosos:
+### Casos Exitosos:
 1. Registrar usuario nuevo → 201 Created
 2. Login con credenciales correctas → 200 OK + Token
 3. Verificar token válido → 200 OK + User info
 
-### ❌ Casos de Error:
+### Casos de Error:
 1. Registrar username duplicado → 400 Bad Request
 2. Login con password incorrecta → 401 Unauthorized
 3. Verificar token inválido/expirado → 401 Unauthorized
 4. Username < 3 caracteres → 422 Validation Error
 5. Password < 6 caracteres → 422 Validation Error
 
-## 🔧 Configuración
+## Configuración
 
 ### Cambiar duración del token:
 En `app/services/auth_service.py`:
@@ -182,7 +182,7 @@ En `app/services/auth_service.py`:
 SECRET_KEY = "tu_clave_secreta_super_segura"
 ```
 
-## 📂 Archivos Creados
+## Archivos Creados
 
 ```
 app/
@@ -206,7 +206,7 @@ examples/
 requirements.txt                 # + passlib[bcrypt], python-jose
 ```
 
-## 🎯 Flujo de Autenticación
+## Flujo de Autenticación
 
 ```
 1. Usuario → POST /auth/register → BD (hash password)
@@ -220,16 +220,16 @@ requirements.txt                 # + passlib[bcrypt], python-jose
 5. Backend → Verifica token → Permite/Deniega acceso
 ```
 
-## 📚 Próximos Pasos (Opcionales)
+## Próximos Pasos (Opcionales)
 
-- [ ] Middleware para proteger endpoints automáticamente
-- [ ] Refresh tokens
-- [ ] Roles y permisos
-- [ ] Reset de contraseña
-- [ ] Límite de intentos de login
-- [ ] Logs de actividad de usuarios
+- Middleware para proteger endpoints automáticamente
+- Refresh tokens
+- Roles y permisos
+- Reset de contraseña
+- Límite de intentos de login
+- Logs de actividad de usuarios
 
-## ⚡ Testing Rápido
+## Testing Rápido
 
 ```bash
 # Terminal 1: Iniciar servidor
