@@ -19,6 +19,7 @@ CREATE TABLE predictions_log (
     model_id BIGINT NOT NULL,
     processing_time_ms INTEGER,
 	source_ip INET,
+	user VARCHAR(50),
 	timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -30,3 +31,15 @@ alter table predictions_log
 	add constraint fk_prections_model
 	foreign key (model_id)
 	references model_version(model_id);
+
+# Tabla de Usuarios
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX ix_users_username ON users(username);

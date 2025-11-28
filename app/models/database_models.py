@@ -1,7 +1,11 @@
-from sqlalchemy import Column, Integer, BigInteger, String, Float, Text, TIMESTAMP, ForeignKey
+from sqlalchemy import (
+    Column, Integer, BigInteger, String, Float, Text,
+    TIMESTAMP, ForeignKey, Boolean
+)
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.sql import func
 from app.config.database import Base
+
 
 class EmotionClass(Base):
     __tablename__ = "emotion_class"
@@ -25,4 +29,19 @@ class PredictionsLog(Base):
     model_id = Column(Integer, ForeignKey("model_version.model_id"), nullable=False)
     processing_time_ms = Column(Integer)
     source_ip = Column(INET)
+    user = Column(String(50), nullable=True)
     timestamp = Column(TIMESTAMP(timezone=True), server_default=func.now())
+
+
+class User(Base):
+    __tablename__ = "users"
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionAI - WebSocket con Autenticación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .result-value {
+            color: #333;
+        }
+        
+        .emotion-large {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+        
+        .user-info {
+            background: #e8eaf6;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .user-info strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 VisionAI WebSocket</h1>
+        <p class="subtitle">Predicción de emociones con autenticación</p>
+        
+        <!-- Sección de Login -->
+        <div class="section">
+            <h2>1. Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña">
+            </div>
+            <button onclick="login()">Iniciar Sesión</button>
+            <div id="loginStatus"></div>
+        </div>
+        
+        <!-- Información del usuario -->
+        <div id="userInfo" style="display: none;">
+            <div class="user-info">
+                <strong>Usuario autenticado:</strong> <span id="currentUser"></span>
+            </div>
+        </div>
+        
+        <!-- Sección de WebSocket -->
+        <div class="section">
+            <h2>2. Conectar WebSocket</h2>
+            <button onclick="connectWebSocket()" id="connectBtn">Conectar al servidor</button>
+            <div id="wsStatus"></div>
+        </div>
+        
+        <!-- Sección de Predicción -->
+        <div class="section">
+            <h2>3. Predecir Emoción</h2>
+            <div class="form-group">
+                <label for="imageInput">Selecciona una imagen:</label>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <button onclick="predictEmotion()" id="predictBtn" disabled>Predecir</button>
+        </div>
+        
+        <!-- Resultados -->
+        <div id="result" style="display: none;"></div>
+    </div>
+    
+    <script>
+        let ws = null;
+        let token = null;
+        let username = null;
+        
+        // Login
+        async function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            if (!user || !pass) {
+                showStatus('loginStatus', 'Ingresa usuario y contraseña', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: user,
+                        password: pass
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    token = data.access_token;
+                    username = user;
+                    
+                    showStatus('loginStatus', '✅ Login exitoso!', 'success');
+                    document.getElementById('currentUser').textContent = username;
+                    document.getElementById('userInfo').style.display = 'block';
+                    
+                } else {
+                    const error = await response.json();
+                    showStatus('loginStatus', '❌ ' + error.detail, 'error');
+                }
+            } catch (error) {
+                showStatus('loginStatus', '❌ Error de conexión: ' + error.message, 'error');
+            }
+        }
+        
+        // Conectar WebSocket
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                showStatus('wsStatus', 'Ya estás conectado', 'info');
+                return;
+            }
+            
+            ws = new WebSocket('ws://localhost:8000/ws');
+            
+            ws.onopen = () => {
+                showStatus('wsStatus', '✅ Conectado al WebSocket', 'success');
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('predictBtn').disabled = false;
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log('Mensaje recibido:', message);
+                
+                if (message.type === 'connection') {
+                    console.log(message.message);
+                } else if (message.type === 'prediction') {
+                    showPredictionResult(message);
+                } else if (message.type === 'error') {
+                    showStatus('wsStatus', '❌ ' + message.message, 'error');
+                }
+            };
+            
+            ws.onerror = (error) => {
+                showStatus('wsStatus', '❌ Error de WebSocket', 'error');
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                showStatus('wsStatus', '❌ Conexión cerrada', 'error');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('predictBtn').disabled = true;
+            };
+        }
+        
+        // Predecir emoción
+        async function predictEmotion() {
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Selecciona una imagen primero');
+                return;
+            }
+            
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('No estás conectado al WebSocket');
+                return;
+            }
+            
+            // Convertir imagen a base64
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                
+                // Crear mensaje con o sin token
+                const message = {
+                    command: 'predict',
+                    image: base64
+                };
+                
+                // Si hay token, incluirlo
+                if (token) {
+                    message.token = token;
+                }
+                
+                // Enviar al servidor
+                ws.send(JSON.stringify(message));
+                
+                showStatus('wsStatus', '⏳ Procesando imagen...', 'info');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Mostrar resultado de predicción
+        function showPredictionResult(result) {
+            const resultDiv = document.getElementById('result');
+            
+            const emotionEmojis = {
+                'angry': '😠',
+                'disgust': '🤢',
+                'fear': '😨',
+                'happy': '😊',
+                'neutral': '😐',
+                'sad': '😢',
+                'surprise': '😲'
+            };
+            
+            const emotionNames = {
+                'angry': 'Enojo',
+                'disgust': 'Disgusto',
+                'fear': 'Miedo',
+                'happy': 'Felicidad',
+                'neutral': 'Neutral',
+                'sad': 'Tristeza',
+                'surprise': 'Sorpresa'
+            };
+            
+            const emoji = emotionEmojis[result.emotion_name] || '🤔';
+            const emotionSpanish = emotionNames[result.emotion_name] || result.emotion_name;
+            const confidencePercent = (result.confidence * 100).toFixed(2);
+            
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h3>Resultado de la Predicción</h3>
+                    <div class="emotion-large">${emoji}</div>
+                    <div class="result-item">
+                        <span class="result-label">Emoción:</span>
+                        <span class="result-value">${emotionSpanish}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Confianza:</span>
+                        <span class="result-value">${confidencePercent}%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${confidencePercent}%">
+                            ${confidencePercent}%
+                        </div>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Tiempo de procesamiento:</span>
+                        <span class="result-value">${result.processing_time_ms}ms</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Modelo:</span>
+                        <span class="result-value">${result.model_version_tag}</span>
+                    </div>
+                    ${result.user ? `
+                    <div class="result-item">
+                        <span class="result-label">Usuario:</span>
+                        <span class="result-value">${result.user}</span>
+                    </div>
+                    ` : ''}
+                    <div class="result-item">
+                        <span class="result-label">Timestamp:</span>
+                        <span class="result-value">${new Date(result.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+            
+            resultDiv.style.display = 'block';
+            showStatus('wsStatus', '✅ Predicción completada!', 'success');
+        }
+        
+        // Función auxiliar para mostrar estados
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

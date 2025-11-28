@@ -20,6 +20,8 @@ El sistema utiliza Deep Learning para detectar emociones faciales y clasifica ex
 
 - **API REST** - Endpoints para estadísticas, dashboard y predicciones
 - **WebSocket** - Stream de cámara en tiempo real (< 10ms latencia)
+- **Autenticación JWT** - Sistema de usuarios con login/registro
+- **Rastreo de Usuario** - Cada predicción asociada a un usuario
 - **Deep Learning** - CNN entrenada para 7 emociones
 - **7 Emociones** - angry, disgust, fear, happy, neutral, sad, surprise
 - **Persistencia** - PostgreSQL con SQLAlchemy
@@ -41,20 +43,27 @@ El sistema utiliza Deep Learning para detectar emociones faciales y clasifica ex
 │       VisionAI Backend (FastAPI + WS)          │
 ├────────────────────────────────────────────────┤
 │  REST API:                  WebSocket:         │
-│  • GET  /api/v1/predict     • ws://host/ws     │
+│  • POST /api/v1/predict     • ws://host/ws     │
 │  • GET  /api/v1/emotions    • predict          │
 │  • GET  /api/v1/model/info  • emotions         │
 │  • GET  /api/v1/dashboard/* • model_info       │
 │  • GET  /api/v1/health      • health           │
+│                                                 │
+│  AUTH API:                                      │
+│  • POST /api/v1/auth/register                  │
+│  • POST /api/v1/auth/login                     │
+│  • GET  /api/v1/auth/verify                    │
+│  • GET  /api/v1/auth/users/me                  │
 └────────┬───────────────────────────────────────┘
          │
          ├──→ prediction_service.py
          │    └──→ ml_service.py → modelo_emociones.h5
          │
          └──→ PostgreSQL
-              ├── predictions_log
+              ├── predictions_log (con user)
               ├── emotion_classes
-              └── model_versions
+              ├── model_versions
+              └── users
 ```
 
 ## Casos de Uso
@@ -134,15 +143,93 @@ El servidor estará disponible en:
 
 Accede a la documentación Swagger en: **http://localhost:8000/docs**
 
+### Autenticación
+
+El sistema incluye autenticación JWT para identificar usuarios en las predicciones.
+
+#### Registrar Usuario
+
+```bash
+POST /api/v1/auth/register
+Content-Type: application/json
+
+curl -X POST "http://localhost:8000/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "usuario",
+    "password": "contraseña123"
+  }'
+```
+
+**Respuesta:**
+```json
+{
+  "user_id": 1,
+  "username": "usuario",
+  "is_active": true,
+  "created_at": "2025-11-28T10:30:00"
+}
+```
+
+#### Iniciar Sesión
+
+```bash
+POST /api/v1/auth/login
+Content-Type: application/json
+
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "usuario",
+    "password": "contraseña123"
+  }'
+```
+
+**Respuesta:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+#### Verificar Token
+
+```bash
+GET /api/v1/auth/verify
+Authorization: Bearer <token>
+
+curl "http://localhost:8000/api/v1/auth/verify" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Obtener Usuario Actual
+
+```bash
+GET /api/v1/auth/users/me
+Authorization: Bearer <token>
+
+curl "http://localhost:8000/api/v1/auth/users/me" \
+  -H "Authorization: Bearer <token>"
+```
+
 ### Endpoints Principales
 
 #### 1. Predicción (Upload de Imagen)
 
+**Sin autenticación (anónima):**
 ```bash
 POST /api/v1/predict
 Content-Type: multipart/form-data
 
 curl -X POST "http://localhost:8000/api/v1/predict" \
+  -F "file=@imagen.jpg"
+```
+
+**Con autenticación (asociada a usuario):**
+```bash
+curl -X POST "http://localhost:8000/api/v1/predict" \
+  -H "Authorization: Bearer <token>" \
   -F "file=@imagen.jpg"
 ```
 
@@ -155,6 +242,8 @@ curl -X POST "http://localhost:8000/api/v1/predict" \
   "processing_time_ms": 145
 }
 ```
+
+> **Nota:** Si envías el token de autenticación, la predicción se guardará asociada a tu usuario en la base de datos (campo `user` en `predictions_log`).
 
 #### 2. Listar Emociones
 
@@ -296,11 +385,20 @@ asyncio.run(connect())
 
 #### 1. PREDICT - Predicción de Emoción
 
-**Enviar:**
+**Sin autenticación:**
 ```json
 {
   "command": "predict",
   "image": "iVBORw0KGgoAAAANSUhEUgAA..."  // Base64
+}
+```
+
+**Con autenticación (recomendado):**
+```json
+{
+  "command": "predict",
+  "image": "iVBORw0KGgoAAAANSUhEUgAA...",  // Base64
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  // JWT token
 }
 ```
 
@@ -313,9 +411,12 @@ asyncio.run(connect())
   "confidence": 0.9234,
   "model_version_tag": "v1.0.0",
   "processing_time_ms": 145,
-  "timestamp": "2025-11-14T10:30:45.123456"
+  "timestamp": "2025-11-28T10:30:45.123456",
+  "user": "username"  // Si se envió token
 }
 ```
+
+> **Nota:** Si incluyes el campo `token` con un JWT válido, la predicción se asociará a tu usuario en la base de datos.
 
 #### 2. EMOTIONS - Lista de Emociones
 
@@ -495,7 +596,143 @@ El proyecto usa PostgreSQL con las siguientes tablas:
 
 - **emotion_classes** - Catálogo de emociones
 - **model_versions** - Versiones del modelo ML
-- **predictions_log** - Historial de predicciones
+- **predictions_log** - Historial de predicciones con usuario
+- **users** - Usuarios del sistema (autenticación)
+
+#### Esquema de predictions_log
+
+```sql
+CREATE TABLE predictions_log (
+    predic_id BIGSERIAL PRIMARY KEY,
+    emotion_id BIGINT NOT NULL,
+    confidence FLOAT NOT NULL,
+    model_id BIGINT NOT NULL,
+    processing_time_ms INTEGER,
+    source_ip INET,
+    user VARCHAR(50),  -- ← Usuario que hizo la predicción
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+## Autenticación y Rastreo de Usuarios
+
+### Sistema de Usuarios
+
+El backend incluye un sistema completo de autenticación JWT que permite:
+
+- Registro de nuevos usuarios
+- Login con generación de token JWT
+- Asociación de predicciones a usuarios
+- Consulta de historial por usuario
+- Análisis de uso por usuario
+
+### Flujo de Autenticación
+
+```mermaid
+sequenceDiagram
+    Cliente->>Backend: POST /auth/register
+    Backend-->>Cliente: Usuario creado
+    Cliente->>Backend: POST /auth/login
+    Backend-->>Cliente: JWT token
+    Cliente->>Backend: POST /predict + Bearer token
+    Backend->>BD: Guarda predicción con username
+    Backend-->>Cliente: Resultado + user
+```
+
+### Ejemplo Completo de Uso
+
+**1. Registrar usuario:**
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "usuario", "password": "pass123"}'
+```
+
+**2. Login:**
+```bash
+TOKEN=$(curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "usuario", "password": "pass123"}' \
+  | jq -r '.access_token')
+```
+
+**3. Predicción autenticada:**
+```bash
+curl -X POST http://localhost:8000/api/v1/predict \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@imagen.jpg"
+```
+
+**4. Ver predicciones del usuario:**
+```sql
+SELECT * FROM predictions_log 
+WHERE user = 'usuario' 
+ORDER BY timestamp DESC;
+```
+
+### Interfaz de Prueba
+
+Incluimos una interfaz web completa para probar la autenticación:
+
+**Abre:** `examples/test_websocket_auth.html`
+
+Características:
+- Login con usuario y contraseña
+- Conexión WebSocket persistente
+- Upload de imágenes con predicción
+- Predicciones asociadas al usuario
+- Visualización de resultados en tiempo real
+
+### Consultas SQL Útiles
+
+**Predicciones por usuario:**
+```sql
+SELECT 
+    user,
+    COUNT(*) as total,
+    AVG(confidence) as confianza_promedio
+FROM predictions_log
+WHERE user IS NOT NULL
+GROUP BY user
+ORDER BY total DESC;
+```
+
+**Top emociones por usuario:**
+```sql
+SELECT 
+    pl.user,
+    ec.emotion_name,
+    COUNT(*) as veces,
+    AVG(pl.confidence) as confianza
+FROM predictions_log pl
+JOIN emotion_class ec ON pl.emotion_id = ec.emotion_id
+WHERE pl.user = 'usuario'
+GROUP BY pl.user, ec.emotion_name
+ORDER BY veces DESC;
+```
+
+**Historial de actividad:**
+```sql
+SELECT 
+    timestamp,
+    user,
+    emotion_name,
+    confidence
+FROM predictions_log pl
+JOIN emotion_class ec ON pl.emotion_id = ec.emotion_id
+WHERE user IS NOT NULL
+ORDER BY timestamp DESC
+LIMIT 50;
+```
+
+### Notas de Seguridad
+
+- Contraseñas hasheadas con bcrypt
+- Tokens JWT con expiración de 24 horas
+- Secret key configurable en producción
+- Autenticación opcional (compatible con predicciones anónimas)
+
+Para más detalles, consulta: [`examples/USER_TRACKING_GUIDE.md`](examples/USER_TRACKING_GUIDE.md)
 
 ## Modelo de Machine Learning
 

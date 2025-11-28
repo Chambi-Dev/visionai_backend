@@ -2,7 +2,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 import datetime
 
-# Schema para predicciones 
+# ============= SCHEMAS DE PREDICCIONES =============
+
+# Schema para predicciones
 class PredictionResponse(BaseModel):
     """Respuesta de predicción de emoción"""
     emotion_name: str = Field(..., description="Nombre de la emoción detectada")
@@ -25,6 +27,7 @@ class PredictionLogBase(BaseModel):
     model_id: int
     processing_time_ms: Optional[int] = None
     source_ip: Optional[str] = None
+    user: Optional[str] = None
     timestamp: datetime.datetime
 
 
@@ -55,3 +58,48 @@ class EmotionInfo(BaseModel):
     emotion_desc: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============= SCHEMAS DE AUTENTICACIÓN =============
+
+class UserCreate(BaseModel):
+    """Schema para crear un nuevo usuario"""
+    username: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        description="Nombre de usuario único"
+    )
+    password: str = Field(
+        ...,
+        min_length=6,
+        max_length=72,
+        description="Contraseña (6-72 caracteres)"
+    )
+
+
+class UserLogin(BaseModel):
+    """Schema para login de usuario"""
+    username: str = Field(..., description="Nombre de usuario")
+    password: str = Field(..., description="Contraseña")
+
+
+class UserResponse(BaseModel):
+    """Schema de respuesta de usuario (sin contraseña)"""
+    user_id: int
+    username: str
+    is_active: bool
+    created_at: datetime.datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    """Schema para token de autenticación"""
+    access_token: str
+    token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    """Datos decodificados del token"""
+    username: Optional[str] = None

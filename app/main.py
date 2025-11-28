@@ -10,17 +10,18 @@ from sqlalchemy.orm import Session
 import json
 import base64
 from datetime import datetime
-from typing import Set
+from typing import Set, Optional
 
 from app.utils.logger import logger
 from app.config.database import SessionLocal
 from app.config.settings import settings
 from app.services.prediction_service import prediction_service
 from app.services.ml_service import ml_service
+from app.services.auth_service import auth_service
 from app.models.database_models import EmotionClass
 
 # Importar rutas REST
-from app.api.routes import predictions, health, dashboard
+from app.api.routes import predictions, health, dashboard, auth
 
 
 # Crear aplicación FastAPI
@@ -40,9 +41,26 @@ app.add_middleware(
 )
 
 # Incluir rutas REST
-app.include_router(predictions.router, prefix=settings.API_V1_PREFIX, tags=["Predictions"])
-app.include_router(health.router, prefix=settings.API_V1_PREFIX, tags=["Health"])
-app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX, tags=["Dashboard"])
+app.include_router(
+    predictions.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Predictions"]
+)
+app.include_router(
+    health.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Health"]
+)
+app.include_router(
+    dashboard.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Dashboard"]
+)
+app.include_router(
+    auth.router,
+    prefix=settings.API_V1_PREFIX + "/auth",
+    tags=["Authentication"]
+)
 
 # Clientes WebSocket conectados
 connected_clients: Set[WebSocket] = set()
@@ -151,7 +169,7 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
     
     Args:
         websocket: Conexión WebSocket del cliente
-        message: Mensaje con imagen en base64
+        message: Mensaje con imagen en base64 y opcionalmente token
         db: Sesión de base de datos
     """
     try:
@@ -162,6 +180,17 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
                 "message": "Campo 'image' requerido"
             })
             return
+        
+        # Extraer usuario del token si está presente
+        username = None
+        if "token" in message:
+            token = message["token"]
+            payload = auth_service.verify_token(token)
+            if payload:
+                username = payload.get("sub")
+                logger.info(f"Predicción autenticada para usuario: {username}")
+            else:
+                logger.warning("Token inválido en predicción WebSocket")
         
         # Decodificar imagen base64
         try:
@@ -190,7 +219,8 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
         result = await prediction_service.predict_emotion(
             image_bytes=image_bytes,
             db=db,
-            source_ip=client_ip
+            source_ip=client_ip,
+            user=username
         )
         
         # Enviar respuesta exitosa
@@ -201,7 +231,8 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
             "confidence": result.confidence,
             "model_version_tag": result.model_version_tag,
             "processing_time_ms": result.processing_time_ms,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "user": username
         })
         
     except ValueError as e:
