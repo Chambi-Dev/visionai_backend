@@ -4,7 +4,8 @@ Endpoints para predicción de emociones.
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.api.dependencies import get_db
+from typing import Optional
+from app.api.dependencies import get_db, get_current_user_optional
 from app.services.prediction_service import prediction_service
 from app.models.schemas import PredictionResponse, PredictionError
 from app.utils.logger import logger
@@ -44,7 +45,8 @@ router = APIRouter()
 async def predict_emotion(
     request: Request,
     file: UploadFile = File(..., description="Imagen con expresión facial (JPEG, PNG, WEBP)"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Optional[str] = Depends(get_current_user_optional)
 ):
     """
     **Predice la emoción en una imagen facial.**
@@ -55,6 +57,10 @@ async def predict_emotion(
       - Tamaño máximo: 5MB
       - Debe contener un rostro claramente visible
     
+    ## Autenticación (Opcional):
+    - Incluye header: `Authorization: Bearer <token>`
+    - Si se incluye, la predicción se asociará al usuario
+    
     ## Retorna:
     - **emotion_name**: Nombre de la emoción detectada
       - Posibles valores: angry, disgust, fear, happy, neutral, sad, surprise
@@ -64,7 +70,14 @@ async def predict_emotion(
     
     ## Ejemplo de uso con curl:
     ```bash
+    # Sin autenticación
     curl -X POST "http://localhost:8000/api/v1/predict" \\
+         -H "Content-Type: multipart/form-data" \\
+         -F "file=@rostro.jpg"
+    
+    # Con autenticación
+    curl -X POST "http://localhost:8000/api/v1/predict" \\
+         -H "Authorization: Bearer <token>" \\
          -H "Content-Type: multipart/form-data" \\
          -F "file=@rostro.jpg"
     ```
@@ -107,7 +120,13 @@ async def predict_emotion(
         result = await prediction_service.predict_emotion(
             image_bytes=image_bytes,
             db=db,
-            source_ip=client_ip
+            source_ip=client_ip,
+            user=current_user
+        )
+        
+        logger.info(
+            f"Predicción REST exitosa: {result.emotion_name} "
+            f"por usuario: {current_user or 'anónimo'}"
         )
         
         return result

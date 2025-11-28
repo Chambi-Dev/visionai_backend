@@ -27,6 +27,7 @@ class PredictionLogBase(BaseModel):
     model_id: int
     processing_time_ms: Optional[int] = None
     source_ip: Optional[str] = None
+    user: Optional[str] = None
     timestamp: datetime.datetime
 
 

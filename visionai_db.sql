@@ -19,6 +19,7 @@ CREATE TABLE predictions_log (
     model_id BIGINT NOT NULL,
     processing_time_ms INTEGER,
 	source_ip INET,
+	user VARCHAR(50),
 	timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 

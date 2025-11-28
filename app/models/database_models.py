@@ -29,6 +29,7 @@ class PredictionsLog(Base):
     model_id = Column(Integer, ForeignKey("model_version.model_id"), nullable=False)
     processing_time_ms = Column(Integer)
     source_ip = Column(INET)
+    user = Column(String(50), nullable=True)
     timestamp = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
 
