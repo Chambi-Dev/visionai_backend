@@ -883,9 +883,3 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Guía de uso WebSocket](examples/README.md)
 - [Guía de autenticación y rastreo de usuarios](examples/USER_TRACKING_GUIDE.md)
-
----
-
-**Última actualización:** Noviembre 2025  
-**Versión:** 2.0.0 (con autenticación JWT)  
-**Estado:** Producción
