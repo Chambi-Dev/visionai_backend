@@ -34,7 +34,7 @@ class PredictionService:
         image_bytes: bytes,
         db: Session,
         source_ip: Optional[str] = None,
-        user: Optional[str] = None
+        user_id: Optional[int] = None
     ) -> PredictionResponse:
         """
         Realiza una predicción completa de emoción.
@@ -49,7 +49,7 @@ class PredictionService:
             image_bytes: Bytes de la imagen a predecir
             db: Sesión de base de datos
             source_ip: IP del cliente (opcional)
-            user: Nombre de usuario que hace la predicción (opcional)
+            user_id: ID del usuario que hace la predicción (opcional)
         
         Returns:
             PredictionResponse: Respuesta con emoción, confianza, etc.
@@ -102,7 +102,7 @@ class PredictionService:
                     model_id=model_id,
                     processing_time_ms=total_time_ms,
                     source_ip=source_ip,
-                    user=user
+                    user_id=user_id
                 )
                 logger.info("Predicción guardada en BD")
             except Exception as e:
@@ -165,7 +165,7 @@ class PredictionService:
         model_id: int,
         processing_time_ms: int,
         source_ip: Optional[str] = None,
-        user: Optional[str] = None
+        user_id: Optional[int] = None
     ) -> None:
         """
         Guarda una predicción en la base de datos.
@@ -177,7 +177,7 @@ class PredictionService:
             model_id: ID del modelo usado
             processing_time_ms: Tiempo de procesamiento en ms
             source_ip: IP del cliente
-            user: Nombre de usuario que hace la predicción
+            user_id: ID del usuario que hace la predicción
         """
         try:
             prediction_log = PredictionsLog(
@@ -186,7 +186,7 @@ class PredictionService:
                 model_id=model_id,
                 processing_time_ms=processing_time_ms,
                 source_ip=source_ip,
-                user=user
+                user_id=user_id
             )
             
             db.add(prediction_log)

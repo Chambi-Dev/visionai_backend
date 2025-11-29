@@ -24,12 +24,12 @@ class ModelVersion(Base):
 class PredictionsLog(Base):
     __tablename__ = "predictions_log"
     predic_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    emotion_id = Column(Integer, ForeignKey("emotion_class.emotion_id"), nullable=False)
+    emotion_id = Column(BigInteger, ForeignKey("emotion_class.emotion_id"), nullable=False)
     confidence = Column(Float, nullable=False)
-    model_id = Column(Integer, ForeignKey("model_version.model_id"), nullable=False)
+    model_id = Column(BigInteger, ForeignKey("model_version.model_id"), nullable=False)
     processing_time_ms = Column(Integer)
     source_ip = Column(INET)
-    user = Column(String(50), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     timestamp = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
 

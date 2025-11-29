@@ -46,7 +46,7 @@ async def predict_emotion(
     request: Request,
     file: UploadFile = File(..., description="Imagen con expresión facial (JPEG, PNG, WEBP)"),
     db: Session = Depends(get_db),
-    current_user: Optional[str] = Depends(get_current_user_optional)
+    current_user: Optional[int] = Depends(get_current_user_optional)
 ):
     """
     **Predice la emoción en una imagen facial.**
@@ -121,7 +121,7 @@ async def predict_emotion(
             image_bytes=image_bytes,
             db=db,
             source_ip=client_ip,
-            user=current_user
+            user_id=current_user
         )
         
         logger.info(

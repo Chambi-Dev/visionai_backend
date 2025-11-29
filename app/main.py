@@ -182,13 +182,19 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
             return
         
         # Extraer usuario del token si está presente
-        username = None
+        user_id = None
         if "token" in message:
             token = message["token"]
             payload = auth_service.verify_token(token)
             if payload:
                 username = payload.get("sub")
-                logger.info(f"Predicción autenticada para usuario: {username}")
+                # Obtener user_id del username
+                user = auth_service.get_user_by_username(db, username)
+                if user:
+                    user_id = user.user_id
+                    logger.info(f"Predicción autenticada para usuario: {username} (ID: {user_id})")
+                else:
+                    logger.warning(f"Usuario no encontrado: {username}")
             else:
                 logger.warning("Token inválido en predicción WebSocket")
         
@@ -220,7 +226,7 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
             image_bytes=image_bytes,
             db=db,
             source_ip=client_ip,
-            user=username
+            user_id=user_id
         )
         
         # Enviar respuesta exitosa
@@ -232,7 +238,7 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
             "model_version_tag": result.model_version_tag,
             "processing_time_ms": result.processing_time_ms,
             "timestamp": datetime.now().isoformat(),
-            "user": username
+            "user_id": user_id
         })
         
     except ValueError as e:

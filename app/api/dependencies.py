@@ -4,7 +4,7 @@ Dependencias inyectables para FastAPI.
 
 from typing import Generator, Optional
 from sqlalchemy.orm import Session
-from fastapi import Header
+from fastapi import Header, Depends
 from app.config.database import SessionLocal
 from app.services.auth_service import auth_service
 from app.utils.logger import logger
@@ -30,18 +30,20 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def get_current_user_optional(
-    authorization: Optional[str] = Header(None)
-) -> Optional[str]:
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+) -> Optional[int]:
     """
-    Dependencia opcional para obtener el usuario autenticado.
-    Si hay token, lo valida y retorna el username.
+    Dependencia opcional para obtener el ID del usuario autenticado.
+    Si hay token, lo valida y retorna el user_id.
     Si no hay token o es inválido, retorna None.
     
     Args:
         authorization: Header Authorization con Bearer token
+        db: Sesión de base de datos
     
     Returns:
-        Username del usuario autenticado o None
+        user_id del usuario autenticado o None
     """
     if not authorization:
         return None
@@ -60,5 +62,12 @@ def get_current_user_optional(
         return None
     
     username = payload.get("sub")
-    logger.info(f"Usuario autenticado: {username}")
-    return username
+    
+    # Obtener user_id de la base de datos
+    user = auth_service.get_user_by_username(db, username)
+    if user:
+        logger.info(f"Usuario autenticado: {username} (ID: {user.user_id})")
+        return user.user_id
+    
+    logger.warning(f"No se pudo obtener user_id para username: {username}")
+    return None
