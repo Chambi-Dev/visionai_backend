@@ -21,7 +21,7 @@ from app.services.auth_service import auth_service
 from app.models.database_models import EmotionClass
 
 # Importar rutas REST
-from app.api.routes import predictions, health, dashboard, auth
+from app.api.routes import predictions, health, dashboard, auth, stats
 
 
 # Crear aplicación FastAPI
@@ -55,6 +55,11 @@ app.include_router(
     dashboard.router,
     prefix=settings.API_V1_PREFIX,
     tags=["Dashboard"]
+)
+app.include_router(
+    stats.router,
+    prefix=settings.API_V1_PREFIX,
+    tags=["Statistics"]
 )
 app.include_router(
     auth.router,

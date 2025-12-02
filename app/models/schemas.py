@@ -95,11 +95,151 @@ class UserResponse(BaseModel):
 
 
 class Token(BaseModel):
-    """Schema para token de autenticación"""
+    """Schema para token de autenticación (access token en body, refresh en cookie)"""
     access_token: str
     token_type: str = "bearer"
+    expires_in: int = Field(
+        default=1800,
+        description="Tiempo de expiración del access token en segundos"
+    )
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema para solicitud de refresh token"""
+    refresh_token: str = Field(..., description="Refresh token para obtener nuevo access token")
 
 
 class TokenData(BaseModel):
     """Datos decodificados del token"""
     username: Optional[str] = None
+
+
+# ============= SCHEMAS DE ESTADÍSTICAS AVANZADAS =============
+
+class EmotionDistribution(BaseModel):
+    """Distribución de emociones"""
+    emotion_name: str
+    count: int
+    percentage: float = Field(..., ge=0.0, le=100.0)
+
+
+class HourlyDistribution(BaseModel):
+    """Distribución por hora del día"""
+    hour: int = Field(..., ge=0, le=23)
+    count: int
+
+
+class DailyStats(BaseModel):
+    """Estadísticas diarias"""
+    date: str
+    total_predictions: int
+    unique_users: int
+    avg_confidence: float
+
+
+class EmotionTrend(BaseModel):
+    """Tendencia de emoción en el tiempo"""
+    date: str
+    emotion_name: str
+    count: int
+
+
+class PublicGlobalStats(BaseModel):
+    """Estadísticas globales públicas del sistema"""
+    total_predictions: int
+    total_unique_users: int
+    total_sessions_today: int
+    most_common_emotion: str
+    avg_confidence: float
+    predictions_last_hour: int
+    predictions_today: int
+
+
+class PublicEmotionDistributionResponse(BaseModel):
+    """Respuesta de distribución de emociones"""
+    total_predictions: int
+    emotions: List[EmotionDistribution]
+
+
+class PublicTrendsResponse(BaseModel):
+    """Respuesta de tendencias públicas"""
+    period_days: int
+    daily_stats: List[DailyStats]
+
+
+class PublicHourlyActivityResponse(BaseModel):
+    """Respuesta de actividad por hora"""
+    hourly_distribution: List[HourlyDistribution]
+    peak_hour: int
+    peak_hour_count: int
+
+
+class PublicEmotionTrendsResponse(BaseModel):
+    """Respuesta de tendencias por emoción"""
+    period_days: int
+    trends: List[EmotionTrend]
+
+
+class UserPersonalStats(BaseModel):
+    """Estadísticas personales del usuario"""
+    user_id: int
+    username: str
+    total_predictions: int
+    predictions_today: int
+    predictions_this_week: int
+    predictions_this_month: int
+    favorite_emotion: Optional[str] = None
+    avg_confidence: float
+    first_prediction_date: Optional[str] = None
+    last_prediction_date: Optional[str] = None
+
+
+class UserDailyActivity(BaseModel):
+    """Actividad diaria del usuario"""
+    date: str
+    prediction_count: int
+
+
+class UserEmotionBreakdown(BaseModel):
+    """Desglose de emociones del usuario"""
+    emotion_name: str
+    count: int
+    percentage: float
+    avg_confidence: float
+
+
+class UserActivityResponse(BaseModel):
+    """Respuesta de actividad del usuario"""
+    period_days: int
+    daily_activity: List[UserDailyActivity]
+    total_predictions: int
+
+
+class UserEmotionStatsResponse(BaseModel):
+    """Respuesta de estadísticas de emociones del usuario"""
+    total_predictions: int
+    emotions: List[UserEmotionBreakdown]
+    most_frequent_emotion: Optional[str] = None
+
+
+class UserRecentPrediction(BaseModel):
+    """Predicción reciente del usuario"""
+    predic_id: int
+    emotion_name: str
+    confidence: float
+    timestamp: str
+    processing_time_ms: Optional[int] = None
+
+
+class UserRecentPredictionsResponse(BaseModel):
+    """Respuesta de predicciones recientes del usuario"""
+    count: int
+    predictions: List[UserRecentPrediction]
+
+
+class PerformanceMetrics(BaseModel):
+    """Métricas de rendimiento del sistema"""
+    avg_processing_time_ms: float
+    min_processing_time_ms: int
+    max_processing_time_ms: int
+    total_predictions_analyzed: int
