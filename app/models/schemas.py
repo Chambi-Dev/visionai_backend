@@ -2,6 +2,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 import datetime
 
+# Configuración para serialización JSON de datetime
+json_encoders = {
+    datetime.datetime: lambda v: v.isoformat()
+}
+
 # ============= SCHEMAS DE PREDICCIONES =============
 
 # Schema para predicciones
@@ -126,22 +131,29 @@ class EmotionDistribution(BaseModel):
 class HourlyDistribution(BaseModel):
     """Distribución por hora del día"""
     hour: int = Field(..., ge=0, le=23)
+    hour_label: str  # e.g., "00:00", "13:00" for chart x-axis
     count: int
 
 
 class DailyStats(BaseModel):
     """Estadísticas diarias"""
-    date: str
+    date: str  # ISO format YYYY-MM-DD for chart compatibility
+    timestamp: datetime.datetime  # Full datetime for precise sorting
     total_predictions: int
     unique_users: int
     avg_confidence: float
+    
+    model_config = ConfigDict(json_encoders=json_encoders)
 
 
 class EmotionTrend(BaseModel):
     """Tendencia de emoción en el tiempo"""
-    date: str
+    date: str  # ISO format YYYY-MM-DD
+    timestamp: datetime.datetime  # Full datetime
     emotion_name: str
     count: int
+    
+    model_config = ConfigDict(json_encoders=json_encoders)
 
 
 class PublicGlobalStats(BaseModel):
@@ -190,14 +202,19 @@ class UserPersonalStats(BaseModel):
     predictions_this_month: int
     favorite_emotion: Optional[str] = None
     avg_confidence: float
-    first_prediction_date: Optional[str] = None
-    last_prediction_date: Optional[str] = None
+    first_prediction_date: Optional[datetime.datetime] = None
+    last_prediction_date: Optional[datetime.datetime] = None
+    
+    model_config = ConfigDict(json_encoders=json_encoders)
 
 
 class UserDailyActivity(BaseModel):
     """Actividad diaria del usuario"""
-    date: str
+    date: str  # ISO format YYYY-MM-DD
+    timestamp: datetime.datetime  # Full datetime
     prediction_count: int
+    
+    model_config = ConfigDict(json_encoders=json_encoders)
 
 
 class UserEmotionBreakdown(BaseModel):
@@ -227,8 +244,10 @@ class UserRecentPrediction(BaseModel):
     predic_id: int
     emotion_name: str
     confidence: float
-    timestamp: str
+    timestamp: datetime.datetime  # Full datetime for precise ordering
     processing_time_ms: Optional[int] = None
+    
+    model_config = ConfigDict(json_encoders=json_encoders)
 
 
 class UserRecentPredictionsResponse(BaseModel):

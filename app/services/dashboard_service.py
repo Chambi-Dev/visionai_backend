@@ -168,6 +168,7 @@ class DashboardService:
                 "daily_stats": [
                     {
                         "date": stat.date.isoformat(),
+                        "timestamp": datetime.combine(stat.date, datetime.min.time()),
                         "total_predictions": stat.total_predictions,
                         "unique_users": stat.unique_users or 0,
                         "avg_confidence": float(stat.avg_confidence or 0.0)
@@ -200,6 +201,7 @@ class DashboardService:
             hourly_distribution = [
                 {
                     "hour": int(hour),
+                    "hour_label": f"{int(hour):02d}:00",
                     "count": count
                 }
                 for hour, count in hourly_data
@@ -252,6 +254,7 @@ class DashboardService:
                 "trends": [
                     {
                         "date": trend.date.isoformat(),
+                        "timestamp": datetime.combine(trend.date, datetime.min.time()),
                         "emotion_name": trend.emotion_name,
                         "count": trend.count
                     }
@@ -401,8 +404,8 @@ class DashboardService:
                 "predictions_this_month": predictions_month,
                 "favorite_emotion": favorite[0] if favorite else None,
                 "avg_confidence": float(avg_confidence),
-                "first_prediction_date": first_prediction.isoformat() if first_prediction else None,
-                "last_prediction_date": last_prediction.isoformat() if last_prediction else None
+                "first_prediction_date": first_prediction if first_prediction else None,
+                "last_prediction_date": last_prediction if last_prediction else None
             }
         except Exception as e:
             logger.error(f"Error getting user personal stats: {e}")
@@ -444,6 +447,7 @@ class DashboardService:
                 "daily_activity": [
                     {
                         "date": activity[0].isoformat(),
+                        "timestamp": datetime.combine(activity[0], datetime.min.time()),
                         "prediction_count": activity[1]
                     }
                     for activity in daily_activity
@@ -554,7 +558,7 @@ class DashboardService:
                         "predic_id": pred.predic_id,
                         "emotion_name": pred.emotion_name,
                         "confidence": float(pred.confidence),
-                        "timestamp": pred.timestamp.isoformat(),
+                        "timestamp": pred.timestamp,
                         "processing_time_ms": pred.processing_time_ms
                     }
                     for pred in recent

@@ -23,23 +23,26 @@ router = APIRouter()
 
 @router.post(
     "/register",
-    response_model=UserResponse,
+    response_model=Token,
     status_code=status.HTTP_201_CREATED,
     summary="Registrar nuevo usuario",
-    description="Crea una nueva cuenta de usuario con username y contraseña"
+    description="Crea una nueva cuenta de usuario con username y contraseña, y retorna tokens de acceso"
 )
 async def register_user(
     user: UserCreate,
+    response: Response,
     db: Session = Depends(get_db)
 ):
     """
-    **Registra un nuevo usuario en el sistema.**
+    **Registra un nuevo usuario en el sistema y retorna tokens de acceso.**
     
     - **username**: Nombre de usuario único (3-50 caracteres)
     - **password**: Contraseña (mínimo 6 caracteres)
     
     Returns:
-        Información del usuario creado (sin contraseña)
+        Access token en response body + Refresh token en httpOnly cookie
+        
+    **Mejor UX:** Usuario queda automáticamente autenticado después del registro
     """
     # Verificar si el usuario ya existe
     existing_user = auth_service.get_user_by_username(db, user.username)
@@ -58,7 +61,30 @@ async def register_user(
             password=user.password
         )
         logger.info(f"Usuario registrado: {user.username}")
-        return db_user
+        
+        # Crear tokens para el nuevo usuario (auto-login después del registro)
+        tokens = auth_service.create_tokens(user.username)
+        
+        # Configurar refresh token en httpOnly cookie
+        response.set_cookie(
+            key="refresh_token",
+            value=tokens["refresh_token"],
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            path="/api/v1/auth/refresh"
+        )
+        
+        logger.info(f"Usuario autenticado automáticamente: {user.username}")
+        
+        # Retornar access token en body
+        return {
+            "access_token": tokens["access_token"],
+            "token_type": "bearer",
+            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        }
+        
     except Exception as e:
         logger.error(f"Error al registrar usuario: {e}")
         raise HTTPException(

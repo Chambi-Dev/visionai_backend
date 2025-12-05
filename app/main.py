@@ -99,8 +99,10 @@ async def websocket_endpoint(websocket: WebSocket):
     """
     WebSocket para predicción de emociones en tiempo real (cámara).
     
+    **REQUIERE AUTENTICACIÓN JWT para predicciones**
+    
     Comandos disponibles:
-    - predict: {"command": "predict", "image": "base64..."}
+    - predict: {"command": "predict", "image": "base64...", "token": "jwt_token"} [AUTH REQUIRED]
     - emotions: {"command": "emotions"}
     - model_info: {"command": "model_info"}
     - health: {"command": "health"}
@@ -117,6 +119,7 @@ async def websocket_endpoint(websocket: WebSocket):
             "type": "connection",
             "status": "connected",
             "message": "Conectado a VisionAI WebSocket - Stream de cámara",
+            "auth_required": "Predicciones requieren token JWT en cada mensaje",
             "timestamp": datetime.now().isoformat()
         })
         
@@ -172,9 +175,11 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
     """
     Maneja solicitudes de predicción de emociones.
     
+    **REQUIERE AUTENTICACIÓN JWT**
+    
     Args:
         websocket: Conexión WebSocket del cliente
-        message: Mensaje con imagen en base64 y opcionalmente token
+        message: Mensaje con imagen en base64 y token JWT obligatorio
         db: Sesión de base de datos
     """
     try:
@@ -186,22 +191,49 @@ async def handle_predict(websocket: WebSocket, message: dict, db: Session):
             })
             return
         
-        # Extraer usuario del token si está presente
-        user_id = None
-        if "token" in message:
-            token = message["token"]
-            payload = auth_service.verify_token(token)
-            if payload:
-                username = payload.get("sub")
-                # Obtener user_id del username
-                user = auth_service.get_user_by_username(db, username)
-                if user:
-                    user_id = user.user_id
-                    logger.info(f"Predicción autenticada para usuario: {username} (ID: {user_id})")
-                else:
-                    logger.warning(f"Usuario no encontrado: {username}")
-            else:
-                logger.warning("Token inválido en predicción WebSocket")
+        # VALIDAR TOKEN (OBLIGATORIO)
+        if "token" not in message:
+            await websocket.send_json({
+                "type": "error",
+                "message": "Autenticación requerida. Incluye 'token' en el mensaje.",
+                "code": "AUTH_REQUIRED"
+            })
+            return
+        
+        token = message["token"]
+        payload = auth_service.verify_token(token)
+        
+        # Si el token es inválido o expiró
+        if not payload:
+            await websocket.send_json({
+                "type": "error",
+                "message": "Token inválido o expirado. Por favor, inicia sesión nuevamente.",
+                "code": "INVALID_TOKEN"
+            })
+            return
+        
+        # Obtener username del token
+        username = payload.get("sub")
+        if not username:
+            await websocket.send_json({
+                "type": "error",
+                "message": "Token inválido: falta información del usuario",
+                "code": "INVALID_TOKEN"
+            })
+            return
+        
+        # Obtener user_id del username
+        user = auth_service.get_user_by_username(db, username)
+        if not user:
+            await websocket.send_json({
+                "type": "error",
+                "message": "Usuario no encontrado",
+                "code": "USER_NOT_FOUND"
+            })
+            return
+        
+        user_id = user.user_id
+        logger.info(f"Predicción autenticada para usuario: {username} (ID: {user_id})")
         
         # Decodificar imagen base64
         try:
