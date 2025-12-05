@@ -38,3 +38,36 @@ CREATE TABLE predictions_log (
 );
 
 CREATE INDEX ix_users_username ON users(username);
+
+-- ============================================
+-- Insert Initial Data (Required for FK Constraints)
+-- ============================================
+
+-- Insert emotion classes (required for predictions_log FK)
+INSERT INTO emotion_class (emotion_id, emotion_name, emotion_desc) VALUES
+(1, 'angry', 'Enojado'),
+(2, 'disgust', 'Disgustado'),
+(3, 'fear', 'Miedo'),
+(4, 'happy', 'Feliz'),
+(5, 'neutral', 'Neutral'),
+(6, 'sad', 'Triste'),
+(7, 'surprise', 'Sorprendido');
+
+-- Reset sequence for emotion_class to avoid conflicts
+SELECT setval('emotion_class_emotion_id_seq', (SELECT MAX(emotion_id) FROM emotion_class));
+
+-- Insert default model version (required for predictions_log FK)
+INSERT INTO model_version (model_id, model_version_tag, model_filename, model_status) VALUES
+(1, 'v1.0.0', 'modelo_emociones.h5', '01');
+
+-- Reset sequence for model_version to avoid conflicts
+SELECT setval('model_version_model_id_seq', (SELECT MAX(model_id) FROM model_version));
+
+-- ============================================
+-- Database Setup Complete
+-- ============================================
+-- Emotion classes: 7 emotions ready for predictions
+-- Model version: v1.0.0 (active)
+-- Users table: Empty (users register via API)
+-- Predictions log: Empty (ready to receive predictions)
+-- ============================================
